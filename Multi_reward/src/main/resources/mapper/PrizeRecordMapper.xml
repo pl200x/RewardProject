@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.Multi_reward.mapper.PrizeRecordMapper">
+    <resultMap id="PrizeRecordResultMap" type="com.example.Multi_reward.entity.PrizeRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bizScene" column="biz_scene"/>
+        <result property="prizeCode" column="prize_code"/>
+        <result property="prizeDate" column="prize_date"/>
+        <result property="prizeStage" column="prize_stage"/>
+        <result property="prizeAmount" column="prize_amount"/>
+        <result property="outBizNo" column="out_biz_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <select id="insert">
+        INSERT INTO prize_record (
+        user_id, biz_scene, prize_code, prize_date, prize_stage, prize_amount, out_biz_no, create_time, update_time
+        ) VALUES (
+        #{userId}, #{bizScene}, #{prizeCode}, #{prizeDate}, #{prizeStage}, #{prizeAmount}, #{outBizNo}, NOW(), NOW()
+        )
+    </select>
+    <select id="selectByOutBizNo" resultMap="PrizeRecordResultMap">
+        SELECT * FROM prize_record WHERE out_biz_no = #{outBizNo}
+    </select>
+    <select id="selectByUserAndDate" resultMap="PrizeRecordResultMap">
+        SELECT * FROM prize_record WHERE user_id = #{userId} AND prize_date = #{prizeDate}
+    </select>
+    <select id="getCount">
+        SELECT COUNT(*) FROM `prize_record` WHERE `create_time` BETWEEN DATE_ADD(NOW(), INTERVAL -1 MINUTE) AND NOW()
+    </select>
+    <select id="getLastMinute" resultMap="PrizeRecordResultMap">
+        SELECT * FROM `prize_record` WHERE `create_time` BETWEEN DATE_ADD(NOW(), INTERVAL -1 MINUTE) AND NOW()
+    </select>
+</mapper>

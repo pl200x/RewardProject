@@ -1,0 +1,77 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: -apple-system, 'SF Pro Display', 'PingFang SC', system-ui, sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Apple Music style hero gradient banner */
+.am-hero {
+  background: linear-gradient(135deg, #fb5c74 0%, #fa2d48 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 28px 32px;
+  box-shadow: 0 10px 30px rgba(250, 45, 72, 0.25);
+}
+.am-hero h1 {
+  color: #fff;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* Section title */
+.am-shelf-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 4px 0 16px;
+  letter-spacing: -0.3px;
+}
+
+/* Card hover lift */
+.am-card {
+  border-radius: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.am-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+/* Square album-cover placeholder */
+.am-cover {
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Horizontal scrolling shelf */
+.am-scroll-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.am-scroll-row::-webkit-scrollbar {
+  height: 6px;
+}
+.am-scroll-row::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}

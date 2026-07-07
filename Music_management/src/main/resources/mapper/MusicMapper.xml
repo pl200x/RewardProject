@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.Music_management.mapper.MusicMapper">
+    <!--  根据用户ID查询用户  -->
+    <resultMap id="MusicResultMap" type="com.example.Music_management.entity.Music">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="artist" column="artist"/>
+        <result property="releaseYear" column="release_year"/>
+        <result property="tags" column="tags"/>
+        <result property="lyrics" column="lyrics"/>
+        <result property="status" column="status"/>
+    </resultMap>
+    <select id="queryById" resultMap = "MusicResultMap">
+        SELECT * FROM music WHERE id = #{id}
+    </select>
+
+<!--    <select id="queryByIds"  resultMap = "MusicResultMap">-->
+<!--        SELECT * FROM music WHERE id in-->
+<!--        <foreach item="id" collection="ids" open ="(" separator="," close =")">-->
+<!--            #{id}-->
+<!--        </foreach>-->
+<!--    </select>-->
+    <select id="queryByIds" resultMap="MusicResultMap">
+        SELECT * FROM music
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY FIELD(id,
+        <foreach item="id" collection="ids" separator=",">
+            #{id}
+        </foreach>
+        )
+    </select>
+
+    <select id="queryAll" resultMap = "MusicResultMap">
+        SELECT * FROM music
+    </select>
+
+    <select id="queryByTitle" resultMap = "MusicResultMap">
+        SELECT * FROM music WHERE title = #{title}
+    </select>
+
+    <!-- 最近新增 n 首:只取上架的,按 id 倒序近似"最新" -->
+    <select id="queryRecent" resultMap="MusicResultMap">
+        SELECT * FROM music
+        WHERE status = 'ONLINE'
+        ORDER BY id DESC
+        LIMIT #{n}
+    </select>
+
+    <!-- 按名称搜索:标题或艺人模糊匹配(MySQL 默认排序规则大小写不敏感),只返回上架的 -->
+    <select id="queryByName" resultMap="MusicResultMap">
+        SELECT * FROM music
+        WHERE status = 'ONLINE'
+          AND (title LIKE CONCAT('%', #{name}, '%') OR artist LIKE CONCAT('%', #{name}, '%'))
+        ORDER BY id DESC
+    </select>
+
+    <!-- ==== 列表用 digest 查询:只取轻量列,永不读取 lyrics(TEXT) ==== -->
+    <resultMap id="MusicDigestResultMap" type="com.example.Music_management.entity.Music">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="artist" column="artist"/>
+        <result property="tags" column="tags"/>
+    </resultMap>
+
+    <!-- 最近新增(digest):WHERE status + ORDER BY id + 选择列 全部命中覆盖索引
+         idx_music_online_digest(status,id,title,artist,tags) → EXPLAIN Extra: Using index,不回表 -->
+    <select id="queryRecentDigest" resultMap="MusicDigestResultMap">
+        SELECT id, title, artist, tags FROM music
+        WHERE status = 'ONLINE'
+        ORDER BY id DESC
+        LIMIT #{n}
+    </select>
+
+    <!-- 按 id 批量(digest):排行/推荐用,id 来自 Redis ZSet;PK 点查已是最快路径,此处收益是列裁剪(不序列化 lyrics) -->
+    <select id="queryDigestByIds" resultMap="MusicDigestResultMap">
+        SELECT id, title, artist, tags FROM music
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY FIELD(id,
+        <foreach item="id" collection="ids" separator=",">
+            #{id}
+        </foreach>
+        )
+    </select>
+
+    <!-- 搜索(digest):'%kw%' 无法索引 seek,但可扫窄的覆盖索引代替扫含 lyrics 的整行 -->
+    <select id="queryByNameDigest" resultMap="MusicDigestResultMap">
+        SELECT id, title, artist, tags FROM music
+        WHERE status = 'ONLINE'
+          AND (title LIKE CONCAT('%', #{name}, '%') OR artist LIKE CONCAT('%', #{name}, '%'))
+        ORDER BY id DESC
+    </select>
+
+    <select id="addMusic">
+        insert into music(title, artist, release_year, tags, lyrics, status)
+        values
+            (#{title}, #{artist}, #{releaseYear}, #{tags},#{lyrics}, #{status})
+    </select>
+
+    <select id="updateMusicStatus">
+        UPDATE music SET status = #{status} WHERE id = #{id}
+    </select>
+
+    <select id="updateTag">
+        UPDATE music SET tag = #{tag} WHERE id = #{id}
+    </select>
+    </mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.Multi_reward.mapper.UserAnalysisMapper">
+    <resultMap id="UserAnalysisMap" type="com.example.Multi_reward.entity.UserAnalysis">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="summaryDate" column="summary_date"/>
+        <result property="totalDuration" column="total_duration"/>
+        <result property="lastPlayTime" column="last_play_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="updateTime"/>
+    </resultMap>
+    <select id="queryByUserAndDate" resultMap="UserAnalysisMap" >
+        SELECT * FROM user_analysis WHERE user_id = #{userId} AND summary_date = #{summaryDate}
+    </select>
+    <select id="insert">
+        INSERT INTO user_analysis(user_id, summary_date,total_duration,last_play_time,create_time,update_time)
+        values
+        (#{userId},#{summaryDate},#{totalDuration},now(),now(),now())
+    </select>
+    <select id="update">
+        UPDATE user_analysis SET total_duration = #{totalDuration}, last_play_time = now(),update_time = now()
+        WHERE user_id = #{userId} AND summary_date = #{summaryDate}
+    </select>
+</mapper>

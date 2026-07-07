@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.PrizeCenter.mapper.PrizeMapper">
+    <resultMap id="PrizeResultMap" type="com.example.PrizeCenter.entity.Prize">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="storage" column="storage"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <!--     -->
+    <select id="queryByCode">
+        SELECT * FROM `prize` WHERE code = #{code};
+    </select>
+    <select id="queryById">
+        SELECT * FROM `prize` WHERE id = #{id};
+    </select>
+
+    <select id="addPrize">
+        INSERT INTO `prize` (code, name, description, storage, create_time, update_time)
+        values
+        (#{code}, #{name}, #{description}, #{storage}, now(), now());
+    </select>
+
+    <select id="updatePrize">
+        UPDATE `prize` SET storage = #{storage}, name = #{name}, description = #{description} WHERE id = #{id}
+    </select>
+    <select id="updatePrizeStorage">
+        UPDATE `prize` SET storage = #{storage} WHERE code = #{code}
+    </select>
+
+    <select id="queryAll">
+        SELECT * FROM `prize`;
+    </select>
+
+    <select id="deletePrize">
+        DELETE FROM `prize` WHERE id = #{id};
+    </select>
+</mapper>

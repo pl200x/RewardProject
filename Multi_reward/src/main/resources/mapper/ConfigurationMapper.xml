@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.Multi_reward.mapper.ConfigurationMapper">
+    <resultMap id="ConfigurationResultMap" type="com.example.Multi_reward.entity.Configuration">
+        <id property="id" column="id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="code" column="code"/>
+        <result property="rule" column="rule"/>
+        <result property="description" column="description"/>
+    </resultMap>
+    <!--  根据用户ID查询用户  -->
+    <select id="queryByCode" resultMap="ConfigurationResultMap">
+        SELECT * FROM configuration WHERE code = #{code}
+    </select>
+
+    <select id="queryAll" resultMap="ConfigurationResultMap">
+        SELECT * FROM configuration
+    </select>
+    <select id="add">
+        insert into configuration(create_time, update_time, code, rule, description)
+        values
+        (now(), now(), #{code}, #{rule},#{description})
+    </select>
+
+    <select id="update">
+        update configuration set description = #{description},
+                             rule = #{rule}
+                             update_time = now()
+        where code = #{code};
+    </select>
+    <select id="delete">
+        delete from configuration where code = #{code};
+    </select>
+
+</mapper>

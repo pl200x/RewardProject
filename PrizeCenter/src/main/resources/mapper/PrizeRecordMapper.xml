@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.PrizeCenter.mapper.PrizeRecordMapper">
+    <resultMap id="PrizeRecordResultMap" type="com.example.PrizeCenter.entity.PrizeRecord">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="amount" column="amount"/>
+        <result property="outbizno" column="out_biz_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <!--     -->
+    <select id="queryByOutBizNo" resultMap="PrizeRecordResultMap">
+        SELECT * FROM `prize_record` WHERE out_biz_no = #{outbizno};
+    </select>
+    <select id="queryById" resultMap="PrizeRecordResultMap">
+        SELECT * FROM `prize_record` WHERE id = #{id};
+    </select>
+
+    <select id="addPrizeRecord">
+        INSERT INTO `prize_record` (code, amount, out_biz_no, create_time, update_time)
+        values
+        (#{code}, #{amount}, #{outbizno}, now(), now());
+    </select>
+
+    <select id="queryAll" resultMap="PrizeRecordResultMap">
+        SELECT * FROM `prize_record`;
+    </select>
+
+    <select id="deletePrizeRecord">
+        DELETE FROM `prize_record` WHERE id = #{id};
+    </select>
+    <select id="getCount">
+        SELECT COUNT(*)  FROM `prize_record` WHERE `create_time` BETWEEN DATE_ADD(NOW(), INTERVAL -1 MINUTE) AND NOW()
+    </select>
+    <select id="getLastMinute" resultMap="PrizeRecordResultMap">
+        SELECT * FROM `prize_record` WHERE `create_time` BETWEEN DATE_ADD(NOW(), INTERVAL -1 MINUTE) AND NOW()
+    </select>
+</mapper>

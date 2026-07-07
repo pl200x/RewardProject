@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.Music_management.mapper.NotificationMapper">
+    <resultMap id="NotificationResultMap" type="com.example.Music_management.entity.Notification">
+        <id property="id" column="id"/>
+        <result property="type" column="type"/>
+        <result property="detail" column="detail"/>
+        <result property="eventTime" column="event_time"/>
+        <result property="sender" column="sender"/>
+        <result property="receiver" column="receiver"/>
+    </resultMap>
+    <!--  根据用户ID查询notificaion  -->
+    <select id="queryById">
+        SELECT * FROM `notificaiton` WHERE `id` = #{id}
+    </select>
+
+    <select id="findAllNotificationByIds">
+        SELECT * FROM `notificaiton` WHERE `id` in
+        <foreach item="id" collection="ids" open ="(" separator="," close =")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="queryByType">
+        SELECT * FROM `notificaiton` WHERE `type` = #{type}
+    </select>
+
+    <select id="queryAll" resultMap = "NotificationResultMap">
+        SELECT * FROM notification
+    </select>
+
+    <select id="add">
+        insert into `notification`(`type`,`detail`,`event_time`,`sender`,`receiver`)
+        values
+        (#{type}, #{detail},now(),#{sender},#{receiver})
+    </select>
+
+
+
+    <!--    <select id="deleteUser">-->
+    <!--        delete from user where id = #{id}-->
+    <!--    </select>-->
+</mapper>

@@ -1,0 +1,46 @@
+# ---- Maven 构建产物 ----
+target/
+target */
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ---- IntelliJ IDEA ----
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# ---- Eclipse / VS Code（以防换 IDE）----
+.classpath
+.project
+.settings/
+.vscode/
+bin/
+
+# ---- 日志（项目里出现过的目录/占位）----
+log/
+logs/
+*.log
+LOG_HOME_IS_UNDEFINED/
+
+# ---- 启停脚本运行时产物 ----
+/run/
+*.pid
+
+# ---- Spring Boot 本地覆盖配置（含密钥时别提交）----
+**/application-local.properties
+**/application-local.yml
+
+# ---- 本地敏感配置 / 工具本地状态（含密码，绝不提交）----
+.env
+.claude/
+
+# ---- 前端 ----
+node_modules/
+dist/
+
+# ---- 操作系统 ----
+.DS_Store
+Thumbs.db

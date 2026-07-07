@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.example</groupId>
+	<artifactId>reward-project-aggregator</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>RewardProject (aggregator)</name>
+	<description>
+		聚合 POM：仅用于把多个相互独立的 Spring Boot 应用归到一个根项目下，
+		方便 IDE 一次性导入和批量构建。每个子模块仍各自继承 spring-boot-starter-parent，
+		拥有自己的 main 类、端口和运行配置，可单独启动，互不依赖。
+	</description>
+
+	<modules>
+		<module>Multi_reward</module>
+		<module>Music_management</module>
+		<module>PrizeCenter</module>
+	</modules>
+</project>
