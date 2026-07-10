@@ -386,10 +386,13 @@
   backdrop-filter: blur(8px);
 }
 
-/* Three columns: center is about 1.5x the side columns. */
+/* Three columns: center is about 1.5x the side columns.
+   minmax(0, …) pins track sizes to the viewport ratio only — a bare `fr` means
+   minmax(auto, …), where the auto minimum tracks card content, so switching
+   pages with longer/shorter titles would shift the column widths. */
 .mm-home__grid {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
   gap: 20px;
   width: 100%;
   max-width: 1320px;
@@ -399,7 +402,7 @@
 }
 @media (max-width: 980px) {
   .mm-home__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -409,6 +412,9 @@
   border: 1px solid var(--mm-border);
   border-radius: var(--mm-radius);
   padding: 18px 16px;
+  /* Grid items default to min-width:auto; without this a wide card row could
+     still force its column wider than the fr ratio. */
+  min-width: 0;
 }
 .mm-col--center {
   background: linear-gradient(180deg, rgba(124, 92, 255, 0.12), rgba(255, 255, 255, 0.04));
@@ -442,6 +448,83 @@
   text-align: center;
   color: var(--mm-muted);
   font-size: 14px;
+}
+
+/* Header with the Top-N control on the right. */
+.mm-col__head--row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mm-col__topn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mm-muted);
+  white-space: nowrap;
+}
+.mm-col__topn-input {
+  width: 52px;
+  padding: 4px 6px;
+  text-align: center;
+  font: inherit;
+  font-size: 13px;
+  color: var(--mm-text);
+  background: var(--mm-surface-2);
+  border: 1px solid var(--mm-border);
+  border-radius: 8px;
+}
+.mm-col__topn-input:focus {
+  outline: none;
+  border-color: rgba(124, 92, 255, 0.6);
+}
+
+/* Fixed 10-row height (row 62px + gap 8px) so columns keep the same height
+   when N < 10 and on a short last page. */
+.mm-col__list--fixed {
+  min-height: calc(62px * 10 + 8px * 9);
+}
+.mm-col__empty--fixed {
+  min-height: calc(62px * 10 + 8px * 9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Per-column pager shown when more than one page. */
+.mm-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 12px;
+}
+.mm-pager__btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--mm-border);
+  background: var(--mm-surface-2);
+  color: var(--mm-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mm-pager__btn:hover:not(:disabled) {
+  border-color: rgba(124, 92, 255, 0.5);
+}
+.mm-pager__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.mm-pager__btn--active {
+  background: rgba(124, 92, 255, 0.25);
+  border-color: rgba(124, 92, 255, 0.6);
 }
 
 /* Guest lock: background list and prompt share one grid cell, no absolute positioning. */

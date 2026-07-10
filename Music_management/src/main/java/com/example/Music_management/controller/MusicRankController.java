@@ -45,12 +45,14 @@ public class MusicRankController {
         return result;
     }
 
-    /** 全局热度榜(digest) —— 首页中列 Top 10。 */
+    /** 全局热度榜(digest) —— 首页中列,条数由用户设定(默认 Top 10)。 */
     @GetMapping("/top")
-    public RecommendMusicPageVO getTopN(int N) {
+    public RecommendMusicPageVO getTopN(Integer N) {
         long start = System.currentTimeMillis();
         try {
-            List<Music> musicList = musicRankService.getTopN(N);
+            // N 缺省/非法时回落 10,避免 N=0 时 Redis range(0,-1) 拉回整个榜单
+            int n = (N == null || N <= 0) ? 10 : N;
+            List<Music> musicList = musicRankService.getTopN(n);
             return buildDigestPage(musicList, System.currentTimeMillis() - start);
         } catch (Exception e) {
             logger.error(e.toString());

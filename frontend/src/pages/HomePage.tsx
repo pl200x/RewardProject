@@ -23,6 +23,11 @@ export default function HomePage() {
   const [mayLike, setMayLike] = useState<MusicDigest[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Per-column Top-N settings (default 10). Values beyond 10 page client-side.
+  const [nRecent, setNRecent] = useState(10)
+  const [nTop, setNTop] = useState(10)
+  const [nMayLike, setNMayLike] = useState(10)
+
   // Search
   const [q, setQ] = useState('')
   const [searched, setSearched] = useState(false)
@@ -38,15 +43,15 @@ export default function HomePage() {
   const loadColumns = useCallback(() => {
     setLoading(true)
     // Guests do not request personalized recommendations; the right column stays locked.
-    const mayLikeReq = auth?.userId ? musicApi.mayLike(auth.userId, 10) : Promise.resolve(null)
-    return Promise.allSettled([musicApi.top(10), musicApi.recent(10), mayLikeReq]).then((res) => {
+    const mayLikeReq = auth?.userId ? musicApi.mayLike(auth.userId, nMayLike) : Promise.resolve(null)
+    return Promise.allSettled([musicApi.top(nTop), musicApi.recent(nRecent), mayLikeReq]).then((res) => {
       const [t, r, m] = res
       if (t.status === 'fulfilled') setTop(t.value.musicDigestVOList ?? [])
       if (r.status === 'fulfilled') setRecent(r.value.musicDigestVOList ?? [])
       if (m.status === 'fulfilled') setMayLike(m.value?.musicDigestVOList ?? [])
       setLoading(false)
     })
-  }, [auth?.userId])
+  }, [auth?.userId, nTop, nRecent, nMayLike])
 
   // Load my liked songs when signed in to initialize heart state.
   const loadLiked = useCallback(() => {
@@ -200,9 +205,11 @@ export default function HomePage() {
               loading={loading}
               empty="No new music yet"
               onItemClick={setSelected}
+              topN={nRecent}
+              onTopNChange={setNRecent}
             />
             <MusicColumn
-              title="Top 10"
+              title={`Top ${nTop}`}
               subtitle="Global popularity chart"
               items={top}
               loading={loading}
@@ -210,6 +217,8 @@ export default function HomePage() {
               center
               empty="No ranking data yet. Likes will build the chart."
               onItemClick={setSelected}
+              topN={nTop}
+              onTopNChange={setNTop}
             />
             <MusicColumn
               title="Music You May Like"
@@ -221,6 +230,8 @@ export default function HomePage() {
               onItemClick={setSelected}
               locked={!isLoggedIn}
               onUnlock={() => nav('/login')}
+              topN={nMayLike}
+              onTopNChange={setNMayLike}
             />
           </div>
         )}
