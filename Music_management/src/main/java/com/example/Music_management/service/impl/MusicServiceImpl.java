@@ -16,6 +16,7 @@ import com.example.Music_management.service.producer.AddMusicProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -44,6 +45,9 @@ public class MusicServiceImpl implements MusicService {
     private EmailService emailService;
     @Autowired
     private UserService userService;
+    /** 前端站点地址,用于拼邮件里的歌曲详情页直达链接(部署时用 FRONTEND_BASE_URL 覆盖) */
+    @Value("${app.frontend.base-url:http://localhost:5173}")
+    private String frontendBaseUrl;
     @Override
     public Music queryById(int id) {
         Music music = musicRepository.getMusic(id);
@@ -97,11 +101,13 @@ public class MusicServiceImpl implements MusicService {
      * 单封发送失败只记日志不中断,避免 Kafka 重投导致前面用户收到重复邮件。
      */
     @Override
-    public void recommend(String title, String artist, String musicTags) {
+    public void recommend(int musicId, String title, String artist, String musicTags) {
         if (musicTags == null || musicTags.trim().isEmpty()) {
             logger.info("event=UPLOAD_MAIL_SKIPPED title='{}' reason=no-tags", title);
             return;
         }
+        // 详情页(/music/:id)游客可直接浏览,邮件里给直达链接,收件人无需先登录 MusicMap
+        String detailUrl = frontendBaseUrl.replaceAll("/+$", "") + "/music/" + musicId;
         // 用户 → 命中的曲风集合(同一用户多个兴趣命中时合并)
         Map<Integer, Set<String>> matchedByUser = new HashMap<>();
         for (String rawTag : musicTags.split(",")) {
@@ -127,8 +133,10 @@ public class MusicServiceImpl implements MusicService {
             String subject = String.format("New %s music on Music Map: %s", matchedStr, title);
             String message = String.format(
                     "Hi %s,%n%nA new %s track \"%s\" by %s has just been released on Music Map — "
-                            + "it matches your interest (%s).%nCome and have a listen!%n%n— Music Map",
-                    user.getName(), matchedStr, title, artist == null ? "Unknown Artist" : artist, matchedStr);
+                            + "it matches your interest (%s).%n%n"
+                            + "Listen now (no login needed):%n%s%n%n— Music Map",
+                    user.getName(), matchedStr, title, artist == null ? "Unknown Artist" : artist, matchedStr,
+                    detailUrl);
             try {
                 emailService.sendEmail(email, subject, message);
                 sent++;

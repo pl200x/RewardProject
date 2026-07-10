@@ -13,8 +13,8 @@ public interface MusicService {
    /** 按名称(标题/艺人)模糊搜索,返回上架的匹配列表 */
    List<Music> queryByName(String name);
    void addMusic(MusicCmd musicCmd);
-   /** 新歌上新通知(Kafka 消费端调用):按 tags 给兴趣用户发个性化邮件;tags 为空则跳过 */
-   void recommend(String title, String artist, String musicTags);
+   /** 新歌上新通知(Kafka 消费端调用):按 tags 给兴趣用户发个性化邮件,附详情页直达链接;tags 为空则跳过 */
+   void recommend(int musicId, String title, String artist, String musicTags);
    void deleteMusic(int musicId);
 
 

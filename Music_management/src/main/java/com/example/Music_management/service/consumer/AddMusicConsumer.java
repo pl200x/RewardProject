@@ -29,7 +29,7 @@ public class AddMusicConsumer {
             throw new MusicNotExistException("music not exist by title: " + content);
         }
         //promote to interested user(tags 为空时 recommend 内部跳过邮件,进榜不受影响)
-        musicService.recommend(content, selectedMusic.getArtist(), selectedMusic.getTags());
+        musicService.recommend(selectedMusic.getId(), content, selectedMusic.getArtist(), selectedMusic.getTags());
         musicRankRepository.addMusicIntoRank(selectedMusic.getId());
         // 新歌同时进入其所属各 genre 分榜(初始分 0),供"按兴趣推荐"读取
         if (selectedMusic.getTags() != null) {
