@@ -5,15 +5,15 @@ A microservice practice project built on **Spring Boot 3.4.3 / Java 17**: users 
 ## Architecture
 
 ```
-                        ┌──────────────────────┐
-   play report POST /music/play                │
+                        ┌───────────────────────┐
+   play report POST /music/play                 │
         │               │  Music_management     │  :8081  (db: test)
         └──────────────▶│  music/users/likes/   │  Kafka producer+consumer, Redis, email
                         │  rankings             │
                         └──────────┬────────────┘
                                    │ HTTP POST /sync
                                    ▼
-                        ┌──────────────────────┐
+                        ┌───────────────────────┐
                         │     Multi_reward      │  :8080  (db: multi_reward)
                         │  orchestration:       │  JEXL rule engine / Kafka retry /
                         │  total time → stage & │  scheduled reconciliation
@@ -21,11 +21,11 @@ A microservice practice project built on **Spring Boot 3.4.3 / Java 17**: users 
                         └──────────┬────────────┘
                                    │ HTTP POST /prize/send_reward (cmd.code=coin/gem/coupon)
                                    ▼
-                        ┌──────────────────────┐
+                        ┌───────────────────────┐
                         │     PrizeCenter       │  :8082  (db: prize_center)
                         │  dispatch by code:    │  stock deduction + idempotent dedup
                         │  coin / gem / coupon  │  (unique out_biz_no)
-                        └──────────────────────┘
+                        └───────────────────────┘
 ```
 
 **Core call chain**: `Music (/music/play)` → `Multi_reward (/sync)` → [JEXL rules evaluate stage / amount from today's accumulated time] → `PrizeCenter (/prize/send_reward)`.
@@ -118,26 +118,6 @@ cp .env.example .env   # fill in your local values (.env is gitignored and never
 
 `scripts/start-all.sh` loads `.env` automatically on startup; when running a single service from the IDE, set the same environment variables in the Run Configuration. Inter-service URLs default to `http://localhost:80xx` (local direct calls) and can be overridden, e.g. via `PRIZECENTER_BASE_URL`.
 
-## Smoke Tests
-
-```bash
-# Read-only endpoints (also openable in a browser)
-curl http://localhost:8082/prize/getallprize      # prize list
-curl http://localhost:8081/music/list             # recommended music
-curl http://localhost:8080/config/searchall       # reward rule configs
-curl "http://localhost:8081/producer/send?content=hi"   # Kafka produce → consume
-
-# End-to-end automatic reward: send 6 plays in a row
-# (each duration ≤ 30; reaching 160 accumulated seconds today triggers a prize)
-for i in 0 1 2 3 4 5; do
-  curl -s -X POST http://localhost:8081/music/play -H "Content-Type: application/json" \
-    -d "{\"userId\":1,\"musicId\":1,\"syncTime\":\"2026-01-01 14:0$i:00\",\"duration\":30,\"scene\":\"Listening_Music\",\"code\":\"coin\"}"; echo
-done
-# Expected: Multi_reward logs show REWARD_EVALUATED / PRIZE_SENT,
-# prize.storage decreases, and a new prize_record row appears
-```
-
-Prize dispatch is idempotent: resending the same `out_biz_no` takes effect only once (returns `errorMessage: "same outbizno"`).
 
 ## Reliability: Dispatch Retry + Dead Letter Topic (DLT)
 
