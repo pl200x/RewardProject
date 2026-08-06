@@ -46,7 +46,7 @@ export default function AdminRecordsPage() {
 
   return (
     <AdminShell>
-      <h2 className="ad-title">📒 Reward Records</h2>
+      <h2 className="ad-title">Reward Records</h2>
 
       <div className="ad-tabs">
         {FILTER_TABS.map((m) => (

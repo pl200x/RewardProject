@@ -63,7 +63,7 @@ export default function RegisterPage() {
     <div className="mm-auth">
       <form className="mm-auth__card" onSubmit={onSubmit}>
         <Link to="/" className="mm-brand mm-brand--sm">
-          <span className="mm-brand__logo">🎵</span>
+          <span className="mm-brand__logo" aria-hidden="true">M</span>
           <span className="mm-brand__name">Music Map</span>
         </Link>
         <h1 className="mm-auth__title">Register</h1>

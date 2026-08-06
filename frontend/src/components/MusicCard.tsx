@@ -1,5 +1,5 @@
 import type { MusicDigest } from '@/api/types'
-import { coverGradient, firstTag } from '@/ui/cover'
+import { coverColor, firstTag } from '@/ui/cover'
 
 interface Props {
   item: MusicDigest
@@ -31,7 +31,7 @@ export default function MusicCard({ item, rank, onClick }: Props) {
       }
     >
       {rank != null && <div className="mm-card__rank">{rank}</div>}
-      <div className="mm-card__cover" style={{ background: coverGradient(item.title || String(item.id)) }}>
+      <div className="mm-card__cover" style={{ background: coverColor(item.title || String(item.id)) }}>
         <span>{initial}</span>
       </div>
       <div className="mm-card__info">

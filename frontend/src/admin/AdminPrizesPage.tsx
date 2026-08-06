@@ -76,7 +76,7 @@ export default function AdminPrizesPage() {
 
   return (
     <AdminShell>
-      <h2 className="ad-title">🎁 Prize Management</h2>
+      <h2 className="ad-title">Prize Management</h2>
 
       <form className="ad-card ad-addform" onSubmit={onAdd}>
         <div className="ad-addform__title">Add Prize</div>

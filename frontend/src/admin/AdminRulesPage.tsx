@@ -80,7 +80,7 @@ export default function AdminRulesPage() {
 
   return (
     <AdminShell>
-      <h2 className="ad-title">📜 Reward Rule Management</h2>
+      <h2 className="ad-title">Reward Rule Management</h2>
       <p className="ad-note">
         STAGE_RULE decides which tier unlocks after a listening duration, and AMOUNT_RULE decides how many rewards that tier grants. Changes apply to the next playback report without restart.
       </p>

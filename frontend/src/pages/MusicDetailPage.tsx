@@ -4,7 +4,7 @@ import { musicApi } from '@/api/music'
 import { rewardApi } from '@/api/reward'
 import { useAuth } from '@/auth/AuthContext'
 import type { CommentVO, MusicDetail, RewardRecord, UserDigestVO } from '@/api/types'
-import { coverGradient } from '@/ui/cover'
+import { coverColor } from '@/ui/cover'
 import { rewardProgress } from '@/ui/reward'
 import { nowDateTime, todayDate } from '@/ui/datetime'
 import { toast } from '@/ui/toast'
@@ -208,7 +208,7 @@ export default function MusicDetailPage() {
     <div className="mm-detail">
       <header className="mm-home__bar">
         <button className="mm-brand mm-brand--btn" onClick={() => nav('/home')} title="Back to home">
-          <span className="mm-brand__logo">🎵</span>
+          <span className="mm-brand__logo" aria-hidden="true">M</span>
           <span className="mm-brand__name">Music Map</span>
         </button>
         <button className="mm-btn mm-btn--ghost" onClick={() => nav(-1)}>
@@ -241,7 +241,7 @@ export default function MusicDetailPage() {
             <div className="mm-detail__head">
               <div
                 className="mm-detail__cover"
-                style={{ background: coverGradient(music.title || String(music.id)) }}
+                style={{ background: coverColor(music.title || String(music.id)) }}
               >
                 <span>{initial}</span>
               </div>
