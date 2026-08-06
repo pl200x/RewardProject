@@ -2,10 +2,10 @@ import { useNavigate } from 'react-router-dom'
 import AdminShell from './AdminShell'
 
 const SECTIONS = [
-  { path: '/admin/prizes', icon: '🎁', label: 'Prize Management', desc: 'Add or delete prizes, and adjust coin, gem, and coupon storage' },
-  { path: '/admin/rules', icon: '📜', label: 'Reward Rule Management', desc: 'View and edit JEXL rules for stage thresholds and reward amounts' },
-  { path: '/admin/music', icon: '🗑️', label: 'Delete Music', desc: 'Take songs offline and remove them from rankings and recommendations' },
-  { path: '/admin/records', icon: '📒', label: 'Reward Records', desc: 'Read-only reward ledger and totals, filterable by prize type' },
+  { path: '/admin/prizes', icon: '01', label: 'Prize Management', desc: 'Add or delete prizes, and adjust coin, gem, and coupon storage' },
+  { path: '/admin/rules', icon: '02', label: 'Reward Rule Management', desc: 'View and edit JEXL rules for stage thresholds and reward amounts' },
+  { path: '/admin/music', icon: '03', label: 'Delete Music', desc: 'Take songs offline and remove them from rankings and recommendations' },
+  { path: '/admin/records', icon: '04', label: 'Reward Records', desc: 'Read-only reward ledger and totals, filterable by prize type' },
 ]
 
 /** Admin home page with large navigation buttons. */

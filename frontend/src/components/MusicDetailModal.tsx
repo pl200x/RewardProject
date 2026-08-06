@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { MusicDigest } from '@/api/types'
-import { coverGradient, firstTag } from '@/ui/cover'
+import { coverColor, firstTag } from '@/ui/cover'
 
 interface Props {
   item: MusicDigest
@@ -39,7 +39,7 @@ export default function MusicDetailModal({ item, liked, isLoggedIn, busy, onTogg
         </button>
 
         <div className="mm-modal__head">
-          <div className="mm-modal__cover" style={{ background: coverGradient(item.title || String(item.id)) }}>
+          <div className="mm-modal__cover" style={{ background: coverColor(item.title || String(item.id)) }}>
             <span>{initial}</span>
           </div>
           <div className="mm-modal__headinfo">

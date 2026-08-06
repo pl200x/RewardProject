@@ -132,10 +132,10 @@ export default function HomePage() {
 
   const hasInterest = !!(auth?.interest && auth.interest.trim())
   const likeSub = hasInterest
-    ? 'Recommended from your interests'
+    ? 'Based on your interests'
     : isLoggedIn
-      ? 'Set interests to personalize recommendations'
-      : 'Log in and set interests for personalized recommendations'
+      ? 'Add interests to personalize this list'
+      : 'Log in for personalized recommendations'
 
   return (
     <div className="mm-home">
@@ -150,7 +150,7 @@ export default function HomePage() {
           aria-label="Back to home"
           title="Back to home"
         >
-          <span className="mm-brand__logo">🎵</span>
+          <span className="mm-brand__logo" aria-hidden="true">M</span>
           <span className="mm-brand__name">Music Map</span>
         </button>
 

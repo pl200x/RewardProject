@@ -1,7 +1,14 @@
 # RewardProject 前端设计与实现文档
 
-> 本文件是前端的设计依据与实现说明,边开发边更新。目标:Apple Music 风格的听歌奖励系统控制台。
-> 技术栈:**Vite + React 18 + TypeScript + Ant Design 5 + React Router 6 + axios**。
+> 本文件是前端的设计依据与实现说明,边开发边更新。目标:具有独立唱片店与音乐杂志气质的听歌奖励平台。
+> 技术栈:**Vite + React 18 + TypeScript + React Router 6 + axios + 手写 CSS**。
+
+### 目标用户
+
+- **音乐听众**:发现新歌、建立兴趣偏好,并通过有效收听解锁奖励。
+- **音乐创作者**:上传 MP3、歌曲资料与歌词,让作品进入平台的发现与推荐链路。
+- **平台运营人员**:管理奖品库存、奖励规则、音乐下架与发奖流水。
+- **次要受众**:关注奖励链路、消息重试和幂等发放实现的开发者与项目评审者。
 
 ---
 
@@ -15,10 +22,10 @@ frontend/
 ├── tsconfig.json
 ├── DESIGN.md                 # 本文档
 └── src/
-    ├── main.tsx              # 入口,挂载 ConfigProvider(antd 主题)+ Router + AuthProvider
-    ├── App.tsx               # 顶层布局(侧边栏 + 顶栏 + 内容区)
-    ├── theme.ts              # Apple Music 风格的 antd 主题 token
-    ├── router.tsx            # 路由表
+    ├── main.tsx              # 入口,挂载 Router + AuthProvider
+    ├── App.tsx               # 路由表与全局提示/会话过期层
+    ├── index.css             # 全局基础样式
+    ├── musicmap.css          # 用户端与管理后台的统一视觉系统
     ├── api/
     │   ├── client.ts         # 5 个 axios 实例 + 统一响应/错误拦截
     │   ├── types.ts          # BaseVO / 各 VO、Cmd 的 TS 类型
@@ -148,28 +155,43 @@ axios 响应拦截器统一:取 `data`,若 `baseVO.success===false` 用 antd `me
 
 ---
 
-## 4. 视觉风格(参考 Apple Music)
+## 4. 视觉风格(独立唱片店 × 音乐杂志)
 
 ### 设计语言
-- **整体**:浅色为主、内容前置、大留白;**左侧边栏导航 + 主内容区**(类似 Apple Music 的 Listen Now / Browse / Library 布局)。
-- **强调色**:Apple Music 标志性**洋红/红**。主色 `#FA2D48`,渐变 `linear-gradient(135deg,#FB5C74,#FA2D48)` 用于 hero banner、主按钮、激活态。
-- **卡片**:大圆角(12–16px)、轻阴影、hover 微上浮;音乐用**封面网格 + 横向滚动 shelf**("为你推荐""最近发奖"等)。
-- **排版**:大而粗的标题(`-apple-system, "SF Pro Display", "PingFang SC", system-ui`);层级分明。
-- **首页(Dashboard)** 做成 Apple Music "Listen Now" 风格:顶部渐变欢迎 banner + 若干横向卡片 shelf(服务状态、关键指标、最近发奖、推荐音乐)。
 
-### antd 主题 token(`theme.ts` / ConfigProvider)
-```ts
-{
-  token: {
-    colorPrimary: '#FA2D48',
-    borderRadius: 12,
-    fontFamily: '-apple-system, "SF Pro Display", "PingFang SC", system-ui, sans-serif',
-    colorBgLayout: '#f5f5f7',     // Apple 经典浅灰
-  }
-}
+- **整体**:暖色、浅色、内容优先;用纸张、唱片封套和编辑排版的感觉替代科技控制台风格。
+- **品牌色**:陶土红 `#A63F2D`,是唯一的产品主强调色;hover/按下使用 `#8E3425`。
+- **背景与表面**:页面背景为暖米色 `#F3EFE7`,主要内容表面为暖白 `#FFFCF6`,次级表面为燕麦灰 `#EAE3D8`。
+- **文字**:主要文字使用暖黑 `#26221D`,次级文字使用暖灰 `#625C54`;重要标题保持实色,不使用渐变文字。
+- **卡片**:使用细边框、中性阴影和 8–14px 的克制圆角;不使用装饰性毛玻璃或霓虹光。
+- **排版**:界面控件使用系统无衬线字体,品牌和主要标题使用 Georgia/宋体回退,形成唱片内页的编辑感。
+- **音乐封面**:占位封面从六个深色大地色中稳定取色,不再为每首歌曲生成彩虹渐变。
+- **欢迎页唱机**:红木纹理只用于欢迎页的材质背景;唱片旋转、唱臂和播放状态组成可点击的播放/暂停动画,并遵循系统的减少动态效果设置。
+- **后台**:用户端与管理后台共享同一套颜色、文字和组件表面,通过信息密度而不是另一套暗色主题区分场景。
+
+### 颜色 token
+
+```css
+--mm-bg: #f3efe7;
+--mm-surface: #fffcf6;
+--mm-surface-subtle: #eae3d8;
+--mm-text: #26221d;
+--mm-muted: #625c54;
+--mm-border: #d5ccbe;
+--mm-accent: #a63f2d;
+--mm-accent-strong: #8e3425;
+--mm-accent-soft: #f2dfd8;
+--mm-accent-ink: #7e2f20;
 ```
-- 侧边栏:浅色(`#fafafa`/白),激活项用主色文字 + 浅色背景;图标用 antd icons。
-- 奖品语义色:coin 金 `#F5A623`、gem 紫 `#7B68EE`、coupon 红 `#FA2D48`(用于标签/图标)。
+
+### 可访问性约定
+
+- 暖黑文字/米色背景对比度 `13.78:1`。
+- 次级文字/米色背景对比度 `5.76:1`。
+- 白色文字/陶土红按钮对比度 `6.23:1`。
+- 深陶土文字/淡陶土背景对比度 `7.05:1`。
+- 焦点使用清晰的陶土色外轮廓;轻微阴影仅用于焦点、弹窗层级和可点击卡片反馈。
+- 成功、警告与错误颜色仅表达对应状态,不作为品牌装饰色。
 
 ---
 

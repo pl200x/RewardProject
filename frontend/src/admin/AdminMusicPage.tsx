@@ -52,7 +52,7 @@ export default function AdminMusicPage() {
 
   return (
     <AdminShell>
-      <h2 className="ad-title">🗑️ Delete Music</h2>
+      <h2 className="ad-title">Delete Music</h2>
       <p className="ad-note">Delete means taking a song offline and removing it from rankings and recommendations. Playback and reward records are retained.</p>
 
       <form className="ad-card ad-row" onSubmit={onSearch}>

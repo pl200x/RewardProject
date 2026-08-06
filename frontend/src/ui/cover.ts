@@ -1,8 +1,9 @@
-// Generate a stable gradient from a string for placeholder album art.
-export function coverGradient(seed: string): string {
-  let h = 0
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360
-  return `linear-gradient(135deg, hsl(${h},70%,60%), hsl(${(h + 48) % 360},72%,46%))`
+// Pick a stable matte color from a small, earthy palette for placeholder art.
+export function coverColor(seed: string): string {
+  const palette = ['#6c3b2a', '#425044', '#51483f', '#765c2f', '#5d3f45', '#3e4b47']
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
+  return palette[hash % palette.length]
 }
 
 /** Tags are comma-separated; the first one is used as the primary genre label. */

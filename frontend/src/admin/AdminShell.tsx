@@ -10,7 +10,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     <div className="ad-shell">
       <header className="ad-bar">
         <button className="ad-brand" onClick={() => nav('/admin')} title="Admin home">
-          🛠️ Music Map · Admin
+          Music Map / Admin
         </button>
         <div className="ad-bar__right">
           {!atHome && (

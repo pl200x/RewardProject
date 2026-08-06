@@ -30,7 +30,7 @@ export default function ConfirmDialog({
     return () => window.removeEventListener('keydown', onKey)
   }, [onCancel])
 
-  // Portal to body so fixed positioning is not affected by backdrop-filter ancestors.
+  // Portal to body so the dialog always sits above page-level stacking contexts.
   return createPortal(
     <div className="mm-confirm" onClick={onCancel}>
       <div className="mm-confirm__panel" onClick={(e) => e.stopPropagation()} role="alertdialog" aria-modal="true">
