@@ -21,6 +21,7 @@ function fmt(sec: number): string {
 export default function AudioPlayer({ musicId, onPlayedChunk }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const playedSecRef = useRef(0)
+  const lastAudibleVolumeRef = useRef(1)
   const chunkCbRef = useRef(onPlayedChunk)
   chunkCbRef.current = onPlayedChunk // Keep the latest callback for the interval.
 
@@ -29,6 +30,7 @@ export default function AudioPlayer({ musicId, onPlayedChunk }: Props) {
   const [playing, setPlaying] = useState(false)
   const [curTime, setCurTime] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [volume, setVolume] = useState(1)
 
   // Fetch the audio URL on mount/song change, and stop playback on unmount.
   useEffect(() => {
@@ -86,6 +88,25 @@ export default function AudioPlayer({ musicId, onPlayedChunk }: Props) {
     if (a && Number.isFinite(v)) a.currentTime = v
   }
 
+  const changeVolume = (v: number) => {
+    if (!Number.isFinite(v)) return
+    const next = Math.min(1, Math.max(0, v))
+    const a = audioRef.current
+    if (a) {
+      a.muted = false
+      a.volume = next
+    }
+    if (next > 0) lastAudibleVolumeRef.current = next
+    setVolume(next)
+  }
+
+  const toggleMute = () => {
+    changeVolume(volume > 0 ? 0 : lastAudibleVolumeRef.current)
+  }
+
+  const volumePercent = Math.round(volume * 100)
+  const volumeIcon = volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'
+
   return (
     <>
       <audio
@@ -95,7 +116,10 @@ export default function AudioPlayer({ musicId, onPlayedChunk }: Props) {
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onEnded={() => setPlaying(false)}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
+        onLoadedMetadata={(e) => {
+          e.currentTarget.volume = volume
+          setDuration(e.currentTarget.duration || 0)
+        }}
       />
       {audioState === 'none' ? (
         <div className="mm-player mm-player--none">
@@ -118,6 +142,32 @@ export default function AudioPlayer({ musicId, onPlayedChunk }: Props) {
             onChange={(e) => seek(Number(e.target.value))}
             aria-label="Playback progress"
           />
+          <div className="mm-player__volume">
+            <button
+              type="button"
+              className="mm-btn mm-btn--ghost mm-player__mute"
+              onClick={toggleMute}
+              disabled={audioState !== 'ready'}
+              aria-label={volume === 0 ? 'Unmute' : 'Mute'}
+              aria-pressed={volume === 0}
+              title={volume === 0 ? 'Unmute' : 'Mute'}
+            >
+              <span aria-hidden="true">{volumeIcon}</span>
+            </button>
+            <input
+              className="mm-player__volume-range"
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={volumePercent}
+              onChange={(e) => changeVolume(Number(e.target.value) / 100)}
+              disabled={audioState !== 'ready'}
+              aria-label="Volume"
+              aria-valuetext={`${volumePercent}%`}
+              title={`Volume: ${volumePercent}%`}
+            />
+          </div>
         </div>
       )}
     </>
