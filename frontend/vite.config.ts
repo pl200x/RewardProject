@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'node:path'
 
 // Development proxy: forward /api/<svc> prefixes to backend service ports.
 // Prefixes are intentionally long to avoid conflicts with client routes.
@@ -10,14 +9,10 @@ const services: Record<string, string> = {
   '/api/prize': 'http://localhost:8082', // PrizeCenter for coin/gem/coupon by prize code
 }
 
-// MinIO static assets such as default avatars. The bucket is anonymously readable.
-// Production can route the same path through nginx/ALB to S3 or MinIO.
-const minioTarget = 'http://localhost:9000'
-
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: { '@': path.resolve(__dirname, 'src') },
+    alias: { '@': new URL('./src', import.meta.url).pathname },
   },
   server: {
     port: 5173,
@@ -28,10 +23,11 @@ export default defineConfig({
           { target, changeOrigin: true, rewrite: (p: string) => p.replace(prefix, '') },
         ]),
       ),
-      '/minio': {
-        target: minioTarget,
+      // Keep MCPChatController same-origin in development. Its public path is /chatbot/chat.
+      '/api/chatbot': {
+        target: 'http://localhost:8083',
         changeOrigin: true,
-        rewrite: (p: string) => p.replace('/minio', ''),
+        rewrite: (p: string) => p.replace(/^\/api\/chatbot/, '/chatbot'),
       },
     },
   },

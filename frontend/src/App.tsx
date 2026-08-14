@@ -13,6 +13,7 @@ import AdminMusicPage from './admin/AdminMusicPage'
 import AdminRecordsPage from './admin/AdminRecordsPage'
 import { ToastHost } from './ui/toast'
 import SessionExpiredOverlay from './components/SessionExpiredOverlay'
+import AIChatWidget from './components/AIChatWidget'
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <AIChatWidget />
       <ToastHost />
       <SessionExpiredOverlay />
     </>
