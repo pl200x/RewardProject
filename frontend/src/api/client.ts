@@ -46,8 +46,8 @@ export function setStoredAuth(a: StoredAuth | null) {
 }
 
 // ---- axios client factory ----
-function createClient(baseURL: string, withAuth = false): AxiosInstance {
-  const inst = axios.create({ baseURL, timeout: 10000 })
+function createClient(baseURL: string, withAuth = false, timeout = 10000): AxiosInstance {
+  const inst = axios.create({ baseURL, timeout })
 
   if (withAuth) {
     inst.interceptors.request.use((config) => {
@@ -87,7 +87,9 @@ function createClient(baseURL: string, withAuth = false): AxiosInstance {
   return inst
 }
 
-// Music_management uses JWT; other services are not authenticated yet.
+// Music_management and ai_chatbot use the same signed user token.
 export const musicClient = createClient('/api/music', true)
 export const rewardClient = createClient('/api/reward')
 export const prizeClient = createClient('/api/prize')
+// AI answers may require several tool calls, so allow more time than a normal API request.
+export const chatbotClient = createClient('/api/chatbot', true, 60000)

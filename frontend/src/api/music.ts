@@ -18,7 +18,7 @@ import type {
 export const musicApi = {
   // Users
   login: (userName: string, password: string) =>
-    musicClient.get<LoginResp>('/user/login', { params: { userName, password } }).then((r) => r.data),
+    musicClient.post<LoginResp>('/user/login', { userName, password }).then((r) => r.data),
   register: (cmd: RegisterCmd) => musicClient.post<BaseVO>('/user/register', cmd).then((r) => r.data),
   logout: (userId: number) => musicClient.delete<BaseVO>('/user/logout', { params: { userId } }).then((r) => r.data),
   changeTag: (userId: number, interest: string) =>
@@ -43,7 +43,7 @@ export const musicApi = {
   search: (name: string) =>
     musicClient.get<RecommendMusicVO>('/music/search', { params: { name } }).then((r) => r.data),
 
-  // Public MinIO presigned audio URL. Missing audio returns success=false.
+  // Public endpoint returning a short-lived S3 audio URL. Missing audio returns success=false.
   audioUrl: (id: number, silent = true) =>
     musicClient.get<AudioUrlVO>('/music/audio-url', { params: { id }, silent } as any).then((r) => r.data),
 

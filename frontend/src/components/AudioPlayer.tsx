@@ -15,7 +15,7 @@ function fmt(sec: number): string {
 }
 
 /**
- * Real audio player using a MinIO presigned URL. Playback is available only
+ * Real audio player using an S3 presigned URL. Playback is available only
  * on the song detail page. Every 30 seconds of active playback triggers one report.
  */
 export default function AudioPlayer({ musicId, onPlayedChunk }: Props) {

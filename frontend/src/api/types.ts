@@ -59,7 +59,7 @@ export interface MusicPageVO {
   musicDetailVO: MusicDetail | null
   baseVO: BaseVO
 }
-/** /music/audio-url: MinIO presigned playback URL. success=false when missing. */
+/** /music/audio-url: S3 presigned playback URL. success=false when missing. */
 export interface AudioUrlVO {
   url: string | null
   baseVO: BaseVO
