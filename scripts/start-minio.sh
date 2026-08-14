@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
-# 启动本机 MinIO(对象存储,存音乐音频)。
+# 启动旧版本机 MinIO,只用于迁移历史音频到 S3。
 #   二进制: ~/minio-tools/minio (官方 dl.min.io 下载;brew 版在本机 macOS 上启动即 SIGSEGV,勿用)
 #   数据:   ~/minio/data (含 bucket: music=音频, test=历史练习)
 #   端口:   9000 (S3 API) / 9001 (Web 控制台)   凭据: minioadmin / minioadmin
 #
 set -u
+echo "[DEPRECATED] 应用已迁移到 Amazon S3;本脚本只用于导出旧 MinIO 数据。"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 mkdir -p "$ROOT/logs" "$ROOT/run"
 

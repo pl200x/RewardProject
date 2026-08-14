@@ -1,31 +1,41 @@
 #!/usr/bin/env bash
 #
-# 启动 RewardProject 的全部前后端(本地):3 个 Spring Boot 服务 + 前端 Vite。
+# 启动 RewardProject 的全部前后端(本地):4 个 Spring Boot 服务 + 前端 Vite。
 #   - 检查依赖中间件(MySQL/Redis/Kafka)是否在跑
-#   - 若缺少可执行 jar,自动 mvn package
-#   - 按依赖顺序启动:PrizeCenter -> Multi_reward -> Music_management -> 前端(5173)
+#   - 每次启动前执行 mvn clean package,确保可执行 jar 与当前源码一致
+#   - 按依赖顺序启动:PrizeCenter -> Multi_reward -> Music_management -> ai_chatbot -> 前端(5173)
 #   - 日志写到 logs/,PID 写到 run/,等待各服务就绪后汇总
 #   - 只起后端(不起前端): ./scripts/start-all.sh --no-frontend
+#   - 跳过重新构建(仅快速启动): ./scripts/start-all.sh --skip-build
 #
 set -u
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-# 加载本地环境变量(数据库密码/邮箱授权码等敏感配置,.env 不入库,见 .env.example)
-if [ -f "$ROOT/.env" ]; then
-  set -a
-  . "$ROOT/.env"
-  set +a
-fi
+# 先加载通用/部署配置,再加载本地覆盖。.env.local 不入库。
+for env_file in "$ROOT/.env" "$ROOT/.env.local" "$ROOT/ai_chatbot/.env"; do
+  if [ -f "$env_file" ]; then
+    set -a
+    . "$env_file"
+    set +a
+  fi
+done
 
-# 是否同时起前端(默认起;传 --no-frontend 只起后端)
+# 启动选项。参数可以组合使用,例如:--no-frontend --skip-build
 WITH_FRONTEND=1
-[ "${1:-}" = "--no-frontend" ] && WITH_FRONTEND=0
+SKIP_BUILD=0
+for arg in "$@"; do
+  case "$arg" in
+    --no-frontend) WITH_FRONTEND=0 ;;
+    --skip-build) SKIP_BUILD=1 ;;
+    *) echo "未知参数:$arg"; exit 2 ;;
+  esac
+done
 
 # 服务名 / 端口(下标对齐)。启动顺序:被调用方在前。
-NAMES=(PrizeCenter Multi_reward Music_management)
-PORTS=(8082        8080         8081)
+NAMES=(PrizeCenter Multi_reward Music_management ai_chatbot)
+PORTS=(8082        8080         8081             8083)
 
 LOG_DIR="$ROOT/logs"
 RUN_DIR="$ROOT/run"
@@ -33,9 +43,9 @@ mkdir -p "$LOG_DIR" "$RUN_DIR"
 
 port_open() { nc -z 127.0.0.1 "$1" >/dev/null 2>&1; }
 
-echo "==> 1) 检查依赖中间件"
+echo "==> 1) 检查本地依赖中间件"
 miss=0
-for dep in "MySQL:3306" "Redis:6379" "Kafka:9092" "MinIO:9000"; do
+for dep in "MySQL:${DB_PORT:-3306}" "Redis:${REDIS_PORT:-6379}" "Kafka:${KAFKA_PORT:-9092}"; do
   name="${dep%%:*}"; port="${dep##*:}"
   if port_open "$port"; then
     echo "    [OK]   $name ($port)"
@@ -44,18 +54,28 @@ for dep in "MySQL:3306" "Redis:6379" "Kafka:9092" "MinIO:9000"; do
     miss=1
   fi
 done
-[ "$miss" -eq 1 ] && echo "    (提示:Redis 用 'redis-server';Kafka 自行启动;MySQL 需导入 sql/;MinIO 用 scripts/start-minio.sh)"
+[ "$miss" -eq 1 ] && echo "    (提示:运行 scripts/local-infra.sh start 可一次启动全部本地中间件)"
+[ -z "${S3_BUCKET:-}" ] && echo "    [WARN] S3_BUCKET 未配置 —— 音频上传和播放会失败"
+if [ -n "${S3_ENDPOINT:-}" ]; then
+  if curl -sS --connect-timeout 2 -o /dev/null "$S3_ENDPOINT"; then
+    echo "    [OK]   S3-compatible storage ($S3_ENDPOINT)"
+  else
+    echo "    [WARN] S3-compatible storage 不可达 ($S3_ENDPOINT)"
+    miss=1
+  fi
+fi
 
-echo "==> 2) 检查可执行 jar"
-need_build=0
-for i in "${!NAMES[@]}"; do
-  [ -f "$ROOT/${NAMES[$i]}/target/${NAMES[$i]}-0.0.1-SNAPSHOT.jar" ] || need_build=1
-done
-if [ "$need_build" -eq 1 ]; then
-  echo "    缺少 jar,执行 mvn package -DskipTests ..."
-  mvn -B -q -DskipTests package || { echo "    构建失败,退出"; exit 1; }
+echo "==> 2) 构建可执行 jar"
+if [ "$SKIP_BUILD" -eq 0 ]; then
+  echo "    执行 mvn clean package -DskipTests,同步当前源码 ..."
+  mvn -B -q -DskipTests clean package || { echo "    构建失败,退出"; exit 1; }
+  echo "    [OK]   4 个后端 jar 已重新构建"
 else
-  echo "    已存在,跳过构建(如需重建可先运行: mvn clean package -DskipTests)"
+  echo "    [SKIP] 已通过 --skip-build 跳过重新构建"
+  for i in "${!NAMES[@]}"; do
+    jar="$ROOT/${NAMES[$i]}/target/${NAMES[$i]}-0.0.1-SNAPSHOT.jar"
+    [ -f "$jar" ] || { echo "    缺少 $jar,无法跳过构建"; exit 1; }
+  done
 fi
 
 echo "==> 3) 启动服务"

@@ -50,7 +50,7 @@ CREATE TABLE `notification` (
 
 LOCK TABLES `notification` WRITE;
 /*!40000 ALTER TABLE `notification` DISABLE KEYS */;
-INSERT INTO `notification` VALUES (1,'LIKE','User 1has liked music: 22','2025-06-23 22:16:20','System','aaEmail@123.com'),(2,'LIKE','User 1has liked music: 4','2025-06-25 17:13:45','demo-sender@example.com','demo-user@example.com'),(3,'LIKE','User 1has liked music: 4','2025-06-25 17:13:51','demo-sender@example.com','demo-user@example.com');
+INSERT INTO `notification` VALUES (1,'LIKE','User 1has liked music: 22','2025-06-23 22:16:20','System','demo-system@example.com'),(2,'LIKE','User 1has liked music: 4','2025-06-25 17:13:45','demo-sender@example.com','demo-user@example.com'),(3,'LIKE','User 1has liked music: 4','2025-06-25 17:13:51','demo-sender@example.com','demo-user@example.com');
 /*!40000 ALTER TABLE `notification` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `user`;
@@ -73,8 +73,8 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
--- 密码为 BCrypt 哈希(明文分别是 111 / jjjjj)
-INSERT INTO `user` VALUES (1,'aa','$2a$10$Cb1MUoJYUZ5AEdQas.gSuusUqZ/uQCx9qpFcZb43L3uopipPGal/e',23,1,'demo-user@example.com','java','gaming,eating',2),(2,'wer','$2a$10$rIWCEJ5tZRYn52VKYwm2M.7Cgdf9Sa0eO/rcc4AzFe1kHf8fgxj46',12,1,'345@gmail.com','jiooi','gaming,reading',7);
+-- Demo hashes use discarded random values; register a new user to sign in.
+INSERT INTO `user` VALUES (1,'aa','$2y$12$oLKlQl68xhMJuW0Akh/CkekqSBHefo8C1zT6j./b3OmssxOkiVfba',23,1,'demo-user@example.com','java','gaming,eating',2),(2,'wer','$2y$12$8ouGSTEVWLpVDy9TpaeJVOb4xb/8hYadkmkXBpyFru6gTVLYENSH6',12,1,'demo-user-2@example.com','jiooi','gaming,reading',7);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -86,4 +86,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-

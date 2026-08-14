@@ -140,7 +140,7 @@ public class MusicController {
     }
     /**
      * 上传音乐(登录用户,账户菜单入口):multipart = 元数据(MusicCmd 各字段) + mp3 文件。
-     * 音频进 MinIO(key=<title>.mp3),元数据复用 addMusic 落库+Kafka(消费端进榜/按 tags 发通知邮件,tags 为空则跳过邮件)。
+     * 音频进 Amazon S3,元数据复用 addMusic 落库+Kafka(消费端进榜/按 tags 发通知邮件,tags 为空则跳过邮件)。
      * 成功返回新歌 id,前端直接跳详情页试听。
      */
     @PostMapping("/upload")
@@ -169,7 +169,7 @@ public class MusicController {
         return vo;
     }
 
-    /** 歌曲音频播放地址(MinIO presigned URL,1h)。无音频/无歌曲时透传具体错误。公开接口,游客可播。 */
+    /** 歌曲音频播放地址(S3 presigned URL,1h)。无音频/无歌曲时透传具体错误。公开接口,游客可播。 */
     @GetMapping("/audio-url")
     public AudioUrlVO audioUrl(int id){
         long start = System.currentTimeMillis();

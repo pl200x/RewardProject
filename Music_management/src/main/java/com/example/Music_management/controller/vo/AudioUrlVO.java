@@ -1,6 +1,6 @@
 package com.example.Music_management.controller.vo;
 
-/** 歌曲音频播放地址(MinIO presigned URL,1 小时有效)。 */
+/** 歌曲音频播放地址(S3 presigned URL,1 小时有效)。 */
 public class AudioUrlVO {
     private String url;
     private BaseVO baseVO;

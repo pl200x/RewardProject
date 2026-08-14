@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# 停止 RewardProject 的全部前后端(3 个 Spring Boot 服务 + 前端 Vite)。
+# 停止 RewardProject 的全部前后端(4 个 Spring Boot 服务 + 前端 Vite)。
 #   优先用 run/<name>.pid 里的 PID;若无 PID 文件,则按端口兜底查找并结束。
 #
 set -u
@@ -8,8 +8,8 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUN_DIR="$ROOT/run"
 
-NAMES=(Music_management Multi_reward PrizeCenter)
-PORTS=(8081             8080         8082)
+NAMES=(ai_chatbot Music_management Multi_reward PrizeCenter)
+PORTS=(8083       8081             8080         8082)
 
 stop_pid() {  # $1=pid $2=name
   local pid="$1" name="$2"

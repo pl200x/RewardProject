@@ -143,8 +143,8 @@ public class MusicServiceImpl implements MusicService {
             } catch (Exception e) {
                 // 单封失败不中断整批,否则 Kafka 重投会让先收到的用户重复收信
                 failed++;
-                logger.warn("event=UPLOAD_MAIL_FAILED title='{}' userId={} email='{}' error={}",
-                        title, user.getId(), email, e.toString());
+                logger.warn("event=UPLOAD_MAIL_FAILED title='{}' userId={} error={}",
+                        title, user.getId(), e.toString());
             }
         }
         logger.info("event=UPLOAD_MAIL_DONE title='{}' tags='{}' targets={} sent={} failed={}",

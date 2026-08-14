@@ -2,8 +2,6 @@ package com.example.Multi_reward.controller.converter;
 
 import com.example.Multi_reward.controller.vo.ConfigurationVO;
 import com.example.Multi_reward.entity.Configuration;
-import com.example.Multi_reward.entity.PlayRecord;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +10,7 @@ public class ConfigurationConverter {
         ConfigurationVO configurationVO = new ConfigurationVO();
         configurationVO.setId(configuration.getId());
         configurationVO.setCode(configuration.getCode());
-        configurationVO.setCode(configuration.getRule());
+        configurationVO.setRule(configuration.getRule());
         configurationVO.setDescription(configuration.getDescription());
         configurationVO.setCreateTime(configuration.getCreateTime());
         configurationVO.setUpdateTime(configuration.getUpdateTime());

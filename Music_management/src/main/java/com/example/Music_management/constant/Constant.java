@@ -10,6 +10,6 @@ public class Constant {
     public static final String NOTIFICATION_DLT_TOPIC = NOTIFICATION + DLT_SUFFIX;
     /** user.interest 列(varchar(255))的字符上限,兴趣标签拼接串不得超过 */
     public static final int INTEREST_MAX_LENGTH = 255;
-    /** 默认头像个数(MinIO avatars bucket 的 0.svg ~ 9.svg),user.avatar 取值 0 ~ AVATAR_COUNT-1 */
+    /** 默认头像个数(前端静态资源 0.svg ~ 9.svg),user.avatar 取值 0 ~ AVATAR_COUNT-1 */
     public static final int AVATAR_COUNT = 10;
 }

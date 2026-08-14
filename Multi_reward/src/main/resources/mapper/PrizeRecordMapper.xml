@@ -34,4 +34,7 @@
     <select id="getLastMinute" resultMap="PrizeRecordResultMap">
         SELECT * FROM `prize_record` WHERE `create_time` BETWEEN DATE_ADD(NOW(), INTERVAL -1 MINUTE) AND NOW()
     </select>
+    <select id="selectByUserAndDateRange" resultMap="PrizeRecordResultMap">
+        SELECT * FROM prize_record WHERE user_id = #{userId} AND create_time BETWEEN #{startTime} AND #{endTime}
+    </select>
 </mapper>

@@ -34,12 +34,17 @@ LOG_HOME_IS_UNDEFINED/
 **/application-local.yml
 
 # ---- 本地敏感配置 / 工具本地状态（含密码，绝不提交）----
-.env
+.env*
+!.env.example
+!.env.local.example
+!**/.env.example
 .claude/
+migration-export/
 
 # ---- 前端 ----
 node_modules/
 dist/
+*.tsbuildinfo
 
 # ---- 操作系统 ----
 .DS_Store

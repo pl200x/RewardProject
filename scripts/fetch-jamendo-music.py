@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-从 Jamendo 随机抓 N 首可下载的 CC 音乐 → 上传 MinIO(bucket: music, key: <歌名>.mp3)
+从 Jamendo 随机抓 N 首可下载的 CC 音乐 → 上传私有 S3 bucket(audio/<歌名>.mp3)
 → 生成 sql/05_jamendo_music.sql(music 表种子, id 201+)。
 
 说明:
@@ -11,7 +11,9 @@
   保证"按兴趣推荐"有数据可匹配。
 - 幂等:重复跑会重新随机选曲;SQL 用固定 id 201.. + INSERT IGNORE,不会重复插行。
 
-依赖: curl、~/minio-tools/mc(alias localminio 已配置)。用法: python3 scripts/fetch-jamendo-music.py
+依赖: curl、AWS CLI；环境变量 S3_BUCKET/AWS_REGION/S3_PREFIX。
+本地 MinIO 可额外设置 S3_ENDPOINT=http://127.0.0.1:19000。
+用法: python3 scripts/fetch-jamendo-music.py
 """
 import html
 import os
@@ -23,8 +25,10 @@ import tempfile
 
 N = 10
 START_ID = 201  # music 表起始 id(避开 ≤124 的既有数据)
-MC = os.path.expanduser("~/minio-tools/mc")
-BUCKET = "localminio/music"
+S3_BUCKET = os.environ.get("S3_BUCKET", "")
+AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
+S3_PREFIX = os.environ.get("S3_PREFIX", "audio").strip("/")
+S3_ENDPOINT = os.environ.get("S3_ENDPOINT", "").strip()
 SQL_OUT = os.path.join(os.path.dirname(__file__), "..", "sql", "05_jamendo_music.sql")
 PRESETS = ["Pop", "Rock", "Hip-Hop/Rap", "Electronic Dance Music (EDM)",
            "Classical", "Jazz", "Country", "R&B"]
@@ -61,6 +65,10 @@ def pick_genre(page, idx):
 
 
 def main():
+    if not S3_BUCKET:
+        print("请先设置 S3_BUCKET；AWS CLI 需已登录到有写权限的身份。", file=sys.stderr)
+        return 2
+
     rng = random.Random()
     picked, seen_ids, seen_titles = [], set(), set()
     tmpdir = tempfile.mkdtemp(prefix="jamendo_")
@@ -101,10 +109,17 @@ def main():
 
         genre = pick_genre(page, len(picked))
         key = f"{title}.mp3"
-        r = subprocess.run([MC, "cp", "--attr", "Content-Type=audio/mpeg", path, f"{BUCKET}/{key}"],
-                           capture_output=True)
+        destination = f"s3://{S3_BUCKET}/{S3_PREFIX + '/' if S3_PREFIX else ''}{key}"
+        aws_cmd = ["aws"]
+        if S3_ENDPOINT:
+            aws_cmd.extend(["--endpoint-url", S3_ENDPOINT])
+        aws_cmd.extend([
+            "s3", "cp", path, destination, "--region", AWS_REGION,
+            "--content-type", "audio/mpeg", "--only-show-errors",
+        ])
+        r = subprocess.run(aws_cmd, capture_output=True)
         if r.returncode != 0:
-            print(f"  [skip] mc 上传失败 {key}: {r.stderr.decode()[:120]}", file=sys.stderr)
+            print(f"  [skip] S3 上传失败 {key}: {r.stderr.decode()[:120]}", file=sys.stderr)
             continue
 
         seen_titles.add(title.lower())
@@ -123,7 +138,7 @@ def main():
     )
     with open(os.path.abspath(SQL_OUT), "w", encoding="utf-8") as f:
         f.write(
-            "-- Jamendo 真实音乐种子(音频在 MinIO bucket `music`, key = `<title>.mp3`)\n"
+            f"-- Jamendo 真实音乐种子(音频在 S3 bucket `{S3_BUCKET}`, key = `{S3_PREFIX}/<title>.mp3`)\n"
             "-- 由 scripts/fetch-jamendo-music.py 生成;幂等(固定 id + INSERT IGNORE)。\n"
             f"-- 来源 track: {', '.join(str(t['tid']) for t in picked)}\n\n"
             "USE `test`;\n\n"
@@ -131,7 +146,8 @@ def main():
             + rows + ";\n"
         )
     print(f"\nSQL 已生成: sql/05_jamendo_music.sql ({len(picked)} 行, id {START_ID}..{START_ID + len(picked) - 1})")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -9,10 +9,12 @@ import com.example.Multi_reward.util.LogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -56,5 +58,25 @@ public class PrizeRecordController {
             vo.setBaseVO(BaseVO.buildBaseVO(false, 500, System.currentTimeMillis() - start, "unknown error"));
         }
         return vo;
+    }
+
+    @GetMapping("/by-user-and-date-range")
+    public MultiPrizeRecordPageVO getByUserAndDateRange( @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date startTime,
+                                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endTime,
+                                                         int userId){
+        long start = System.currentTimeMillis();
+        LogContext.setUserId(userId);
+        MultiPrizeRecordPageVO vo = new MultiPrizeRecordPageVO();
+        try {
+            List<PrizeRecord> recordList = prizeRecordService.selectByUserAndDateRange(userId, startTime, endTime);
+            vo.setPrizeRecordVOList(PrizeRecordVOConverter.convertVOList(recordList));
+            vo.setBaseVO(BaseVO.buildBaseVO(true, 200, System.currentTimeMillis() - start, null));
+        } catch (Exception e) {
+            log.error("event=PRIZE_RECORD_DATE_QUERY_ERROR userId={} startTime={} endTime = {} error={}",
+                    userId, startTime, endTime, e.getMessage(), e);
+            vo.setBaseVO(BaseVO.buildBaseVO(false, 500, System.currentTimeMillis() - start, "unknown error"));
+        }
+        return vo;
+
     }
 }

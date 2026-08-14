@@ -1,4 +1,4 @@
--- Jamendo 真实音乐种子(音频在 MinIO bucket `music`, key = `<title>.mp3`)
+-- Jamendo 真实音乐种子(音频在私有 S3 bucket, key = `audio/<title>.mp3`)
 -- 由 scripts/fetch-jamendo-music.py 生成;幂等(固定 id + INSERT IGNORE)。
 -- 来源 track: 438223, 1369721, 1827871, 1209633, 1367340, 1439391, 1062048, 357243, 1700955, 702497
 
