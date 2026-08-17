@@ -9,7 +9,7 @@ public class User {
     private String email;
     private String job;
     private String interest;
-    /** 默认头像序号 0-9(MinIO avatars bucket 里的 <n>.svg),注册时随机分配 */
+    /** 默认头像序号 0-9(前端静态资源 avatars/<n>.svg),注册时随机分配 */
     private int avatar;
 
 
@@ -31,7 +31,7 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", password='" + password + '\'' +
+                ", password='[REDACTED]'" +
                 ", age=" + age +
                 ", gender=" + gender +
                 ", email='" + email + '\'' +

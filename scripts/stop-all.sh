@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 #
-# 停止 RewardProject 的全部前后端(3 个 Spring Boot 服务 + 前端 Vite)。
+# 停止 RewardProject 的全部前后端(4 个 Spring Boot 服务 + 前端 Vite)。
 #   优先用 run/<name>.pid 里的 PID;若无 PID 文件,则按端口兜底查找并结束。
+#   按端口兜底时必须加 -sTCP:LISTEN,只匹配监听方;否则连到该端口的客户端
+#   (浏览器标签、curl)也会被匹配并杀掉。
 #
 set -u
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUN_DIR="$ROOT/run"
 
-NAMES=(Music_management Multi_reward PrizeCenter)
-PORTS=(8081             8080         8082)
+NAMES=(ai_chatbot Music_management Multi_reward PrizeCenter)
+PORTS=(8083       8081             8080         8082)
 
 stop_pid() {  # $1=pid $2=name
   local pid="$1" name="$2"
@@ -36,7 +38,7 @@ for i in "${!NAMES[@]}"; do
 
   if [ "$stopped" -eq 0 ]; then
     # 兜底:按端口找(例如服务不是用本脚本启动的)
-    pids="$(lsof -ti tcp:"$port" 2>/dev/null)"
+    pids="$(lsof -ti tcp:"$port" -sTCP:LISTEN 2>/dev/null)"
     if [ -n "$pids" ]; then
       for pid in $pids; do stop_pid "$pid" "$name"; done
       echo "    [STOP] $name (端口 $port: $pids)"
@@ -59,7 +61,7 @@ if [ -f "$front_pidf" ]; then
   rm -f "$front_pidf"
 fi
 if [ "$front_stopped" -eq 0 ]; then
-  pids="$(lsof -ti tcp:5173 2>/dev/null)"
+  pids="$(lsof -ti tcp:5173 -sTCP:LISTEN 2>/dev/null)"
   if [ -n "$pids" ]; then
     for pid in $pids; do stop_pid "$pid" "前端"; done
     echo "    [STOP] 前端 (端口 5173: $pids)"

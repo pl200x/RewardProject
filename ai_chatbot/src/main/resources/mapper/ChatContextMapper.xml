@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.ai_chatbot.mapper.ChatContextMapper">
+
+    <resultMap id="ChatContextResultMap" type="com.example.ai_chatbot.entity.ChatContext">
+        <id property="id" column="id"/>
+        <result property="sessionId" column="session_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="messageContent" column="message_content"/>
+        <result property="messageSentTime" column="message_sent_time"/>
+        <result property="readStatus" column="read_status"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.ai_chatbot.entity.ChatContext"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_context
+            (session_id, user_id, message_content, message_sent_time, read_status)
+        VALUES
+            (#{sessionId}, #{userId}, #{messageContent}, #{messageSentTime}, #{readStatus})
+    </insert>
+
+    <select id="findById" resultMap="ChatContextResultMap">
+        SELECT id, session_id, user_id, message_content, message_sent_time, read_status
+        FROM chat_context
+        WHERE id = #{id}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findBySessionId" resultMap="ChatContextResultMap">
+        SELECT id, session_id, user_id, message_content, message_sent_time, read_status
+        FROM chat_context
+        WHERE session_id = #{sessionId}
+          AND user_id = #{userId}
+        ORDER BY message_sent_time ASC, id ASC
+    </select>
+
+    <update id="updateReadStatus">
+        UPDATE chat_context
+        SET read_status = #{readStatus}
+        WHERE id = #{id}
+          AND user_id = #{userId}
+    </update>
+
+    <update id="updateSessionReadStatus">
+        UPDATE chat_context
+        SET read_status = #{readStatus}
+        WHERE session_id = #{sessionId}
+          AND user_id = #{userId}
+          AND read_status != #{readStatus}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM chat_context
+        WHERE id = #{id}
+          AND user_id = #{userId}
+    </delete>
+
+    <delete id="deleteBySessionId">
+        DELETE FROM chat_context
+        WHERE session_id = #{sessionId}
+          AND user_id = #{userId}
+    </delete>
+</mapper>

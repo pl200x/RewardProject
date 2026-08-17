@@ -3,6 +3,7 @@ package com.example.Multi_reward.mapper;
 import com.example.Multi_reward.entity.PrizeRecord;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -12,4 +13,5 @@ public interface PrizeRecordMapper {
     List<PrizeRecord> selectByUserAndDate(int userId, String prizeDate);
     int getCount();
     List<PrizeRecord> getLastMinute();
+    List<PrizeRecord> selectByUserAndDateRange(int userId, Date startTime, Date endTime);
 }

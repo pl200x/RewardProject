@@ -17,8 +17,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    /** 演示密钥;生产应放环境变量。HMAC-SHA256 需 >=32 字节。 */
-    @Value("${jwt.secret:reward-project-demo-secret-key-please-change-in-prod-0123456789}")
+    /** 必须由环境变量提供。HMAC-SHA256 需 >=32 字节。 */
+    @Value("${jwt.secret:}")
     private String secret;
 
     /** 过期时间:1 天(毫秒)。 */

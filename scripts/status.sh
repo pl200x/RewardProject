@@ -7,16 +7,33 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUN_DIR="$ROOT/run"
 
-NAMES=(Multi_reward Music_management PrizeCenter)
-PORTS=(8080         8081             8082)
+for env_file in "$ROOT/.env" "$ROOT/.env.local" "$ROOT/ai_chatbot/.env"; do
+  if [ -f "$env_file" ]; then
+    set -a
+    . "$env_file"
+    set +a
+  fi
+done
+
+NAMES=(Multi_reward Music_management PrizeCenter ai_chatbot)
+PORTS=(8080         8081             8082        8083)
 
 port_open() { nc -z 127.0.0.1 "$1" >/dev/null 2>&1; }
 
 echo "== 中间件 =="
-for dep in "MySQL:3306" "Redis:6379" "Kafka:9092" "MinIO:9000"; do
+for dep in "MySQL:${DB_PORT:-3306}" "Redis:${REDIS_PORT:-6379}" "Kafka:${KAFKA_PORT:-9092}"; do
   name="${dep%%:*}"; port="${dep##*:}"
   if port_open "$port"; then echo "  [UP]   $name ($port)"; else echo "  [DOWN] $name ($port)"; fi
 done
+if [ -n "${S3_ENDPOINT:-}" ]; then
+  if curl -sS --connect-timeout 2 -o /dev/null "$S3_ENDPOINT"; then
+    echo "  [UP]   S3-compatible storage ($S3_ENDPOINT)"
+  else
+    echo "  [DOWN] S3-compatible storage ($S3_ENDPOINT)"
+  fi
+else
+  echo "  [REMOTE] Amazon S3 (no endpoint override)"
+fi
 
 echo "== 服务 =="
 for i in "${!NAMES[@]}"; do

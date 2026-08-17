@@ -20,5 +20,6 @@
 		<module>Multi_reward</module>
 		<module>Music_management</module>
 		<module>PrizeCenter</module>
+		<module>ai_chatbot</module>
 	</modules>
 </project>

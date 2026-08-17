@@ -1,5 +1,6 @@
 package com.example.Music_management.controller;
 
+import com.example.Music_management.controller.cmd.LoginCmd;
 import com.example.Music_management.controller.cmd.RegisterCmd;
 import com.example.Music_management.controller.vo.BaseVO;
 import com.example.Music_management.controller.vo.LoginVO;
@@ -44,12 +45,14 @@ public class UserController {
        }
 
     }
-    @GetMapping("/login")
-    public LoginVO login(String userName, String password){
+    @PostMapping("/login")
+    public LoginVO login(@RequestBody LoginCmd loginCmd){
         long start = System.currentTimeMillis();
         long end;
         try{
-            User user = userService.login(userName,password);
+            String userName = loginCmd == null ? null : loginCmd.getUserName();
+            String password = loginCmd == null ? null : loginCmd.getPassword();
+            User user = userService.login(userName, password);
             String token = jwtUtil.generate(user.getId(), user.getName());
             end = System.currentTimeMillis();
             return LoginVO.success(token, user.getId(), user.getName(), user.getInterest(), user.getAvatar(), end - start);
@@ -89,7 +92,7 @@ public class UserController {
             return BaseVO.buildVO(500,end - start,false,"other unknown error");
         }
     }
-    /** 更换默认头像(0-9,存 user.avatar tinyint);头像图本体在 MinIO avatars bucket,前端按序号拼 URL */
+    /** 更换默认头像(0-9,存 user.avatar tinyint);头像图由前端静态资源提供 */
     @PostMapping("/change-avatar")
     public BaseVO changeAvatar(int userId, int avatar){
         long start = System.currentTimeMillis();

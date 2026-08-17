@@ -8,6 +8,10 @@ public class RegisterCmd {
     private String email;
     private String job;
     private String interest;
+
+    public RegisterCmd() {
+    }
+
     public RegisterCmd(String name, String password, int age, int gender, String email, String job, String interest) {
         this.name = name;
         this.password = password;
@@ -78,7 +82,7 @@ public class RegisterCmd {
     public String toString() {
         return "RegisterCmd{" +
                 "name='" + name + '\'' +
-                ", password='" + password + '\'' +
+                ", password='[REDACTED]'" +
                 ", age=" + age +
                 ", gender=" + gender +
                 ", email='" + email + '\'' +

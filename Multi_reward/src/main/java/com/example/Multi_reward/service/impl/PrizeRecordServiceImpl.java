@@ -6,6 +6,7 @@ import com.example.Multi_reward.service.PrizeRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -35,5 +36,10 @@ public class PrizeRecordServiceImpl implements PrizeRecordService {
     @Override
     public List<PrizeRecord> queryLastMinute() {
         return prizeRecordMapper.getLastMinute();
+    }
+
+    @Override
+    public List<PrizeRecord> selectByUserAndDateRange(int userId, Date startTime, Date endTime) {
+        return prizeRecordMapper.selectByUserAndDateRange(userId, startTime,endTime);
     }
 }
