@@ -5,7 +5,6 @@ import com.example.Multi_reward.entity.PlayRecord;
 import com.example.Multi_reward.entity.RewardEvaluation;
 import com.example.Multi_reward.entity.RewardRetryMessage;
 import com.example.Multi_reward.exception.IllegalDurationTimeException;
-import com.example.Multi_reward.integration.PrizeIntegration;
 import com.example.Multi_reward.service.PlayRecordService;
 import com.example.Multi_reward.service.SyncService;
 import com.example.Multi_reward.service.UserAnalysisService;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -32,7 +30,7 @@ public class SyncServiceImpl implements SyncService {
     @Autowired private PlayRecordService playRecordService;
     @Autowired private UserAnalysisService userAnalysisService;
     @Autowired private RewardCalculator rewardCalculator;
-    @Autowired private PrizeIntegration prizeIntegration;
+    @Autowired private RewardGrantService rewardGrantService;
     @Autowired private RetryProducer retryProducer;
 
     private static final Logger log = LoggerFactory.getLogger(SyncServiceImpl.class);
@@ -74,16 +72,9 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    @Transactional
     @Override
     public void sendPrize(RewardRetryMessage retryMessage) {
-        // 奖品 code 是否存在由 PrizeCenter 校验(单一事实来源),不存在时透传具体错误进重试日志
-        prizeIntegration.sendPrize(
-                retryMessage.getPlayCmd(),
-                retryMessage.getStage(),
-                retryMessage.getAmount(),
-                retryMessage.getToday(),
-                retryMessage.getOutbizno());
+        rewardGrantService.sendPrize(retryMessage);
     }
 
     private void checkDuration(PlayCmd playCmd) {

@@ -15,13 +15,13 @@ for env_file in "$ROOT/.env" "$ROOT/.env.local" "$ROOT/ai_chatbot/.env"; do
   fi
 done
 
-NAMES=(Multi_reward Music_management PrizeCenter ai_chatbot)
-PORTS=(8080         8081             8082        8083)
+NAMES=(service-registry Multi_reward Music_management PrizeCenter ai_chatbot)
+PORTS=("${REGISTRY_PORT:-8761}" "${REWARD_PORT:-8080}" "${MUSIC_PORT:-8081}" "${PRIZE_PORT:-8082}" "${CHATBOT_PORT:-8083}")
 
 port_open() { nc -z 127.0.0.1 "$1" >/dev/null 2>&1; }
 
 echo "== 中间件 =="
-for dep in "MySQL:${DB_PORT:-3306}" "Redis:${REDIS_PORT:-6379}" "Kafka:${KAFKA_PORT:-9092}"; do
+for dep in "MySQL:${DB_PORT:-3306}" "Redis:${REDIS_PORT:-6379}" "Kafka:${KAFKA_PORT:-9092}" "Seata:${SEATA_PORT:-18091}"; do
   name="${dep%%:*}"; port="${dep##*:}"
   if port_open "$port"; then echo "  [UP]   $name ($port)"; else echo "  [DOWN] $name ($port)"; fi
 done

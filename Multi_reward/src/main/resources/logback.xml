@@ -5,7 +5,7 @@
     <!-- Console: human-readable for local development, shows traceId and userId -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{traceId}] [uid:%X{userId}] %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [svc:%X{service}] [instance:%X{instance}] [request:%X{traceId}] [%X{traceId}] [uid:%X{userId}] %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 

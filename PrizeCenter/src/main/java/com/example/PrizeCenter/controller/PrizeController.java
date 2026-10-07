@@ -79,9 +79,9 @@ public class PrizeController {
         }catch (PrizeDoNotExistedException e) {
             return BaseVO.buildBaseVO(false, 500, System.currentTimeMillis() - start, e.getMessage());
         } catch(DuplicateKeyException e){
-            //catch DuplicateKeyException因为我们update时不catch for idempotent key, 避免insert重复的outbizno，
-            //但是因为这是一个exception，所以要catch并返回200，否则结果为500
-            return BaseVO.buildBaseVO(true,200,System.currentTimeMillis()-start,"same outbizno");
+            // Committed replays are handled inside the service after checking the global lock.
+            // A racing insert is not proof that the other global transaction will commit.
+            return BaseVO.buildBaseVO(false,500,System.currentTimeMillis()-start,"concurrent award; retry");
         }catch(PrizeStorageShortageException e){
             logger.error(e.toString());
             return BaseVO.buildBaseVO(false,500,System.currentTimeMillis()-start,e.getMessage());

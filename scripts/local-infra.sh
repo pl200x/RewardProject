@@ -18,7 +18,9 @@ compose() {
 
 case "${1:-start}" in
   start)
-    compose up -d --remove-orphans
+    compose up -d --wait mysql redis kafka minio seata-server
+    compose run --rm --no-deps seata-schema
+    compose run --rm --no-deps minio-init
     compose ps
     ;;
   stop)

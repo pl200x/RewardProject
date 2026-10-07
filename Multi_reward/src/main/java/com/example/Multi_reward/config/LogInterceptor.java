@@ -4,6 +4,7 @@ import com.example.Multi_reward.util.LogContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import org.slf4j.MDC;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -18,7 +19,8 @@ public class LogInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String traceId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        String traceId = MDC.get("traceId");
+        if (traceId == null) traceId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
         LogContext.setTraceId(traceId);
         request.setAttribute(ATTR_START, System.currentTimeMillis());
         log.info("event=REQUEST_IN method={} uri={}", request.getMethod(), request.getRequestURI());

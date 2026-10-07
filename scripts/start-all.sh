@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# 启动 RewardProject 的全部前后端(本地):4 个 Spring Boot 服务 + 前端 Vite。
+# 启动 RewardProject 的全部前后端(本地):注册中心 + 4 个 Spring Boot 服务 + 前端 Vite。
 #   - 检查依赖中间件(MySQL/Redis/Kafka)是否在跑
 #   - 每次启动前执行 mvn clean package,确保可执行 jar 与当前源码一致
 #   - 每次都先停掉已在运行的旧进程再重启,否则重新构建出的 jar 不会被加载
-#   - 按依赖顺序启动:PrizeCenter -> Multi_reward -> Music_management -> ai_chatbot -> 前端(5173)
+#   - 按依赖顺序启动:service-registry -> PrizeCenter -> Multi_reward -> Music_management -> ai_chatbot -> 前端(5173)
 #   - 日志写到 logs/,PID 写到 run/,等待各服务就绪后汇总
 #   - 只起后端(不起前端): ./scripts/start-all.sh --no-frontend
 #   - 跳过重新构建(仅快速重启,复用已有 jar): ./scripts/start-all.sh --skip-build
@@ -48,9 +48,11 @@ for arg in "$@"; do
   esac
 done
 
+export EUREKA_DEFAULT_ZONE="${EUREKA_DEFAULT_ZONE:-http://localhost:${REGISTRY_PORT:-8761}/eureka/}"
+
 # 服务名 / 端口(下标对齐)。启动顺序:被调用方在前。
-NAMES=(PrizeCenter Multi_reward Music_management ai_chatbot)
-PORTS=(8082        8080         8081             8083)
+NAMES=(service-registry PrizeCenter Multi_reward Music_management ai_chatbot)
+PORTS=("${REGISTRY_PORT:-8761}" "${PRIZE_PORT:-8082}" "${REWARD_PORT:-8080}" "${MUSIC_PORT:-8081}" "${CHATBOT_PORT:-8083}")
 
 LOG_DIR="$ROOT/logs"
 RUN_DIR="$ROOT/run"
@@ -90,7 +92,7 @@ stop_service() {  # $1=name $2=port
 
 echo "==> 1) 检查本地依赖中间件"
 miss=0
-for dep in "MySQL:${DB_PORT:-3306}" "Redis:${REDIS_PORT:-6379}" "Kafka:${KAFKA_PORT:-9092}"; do
+for dep in "MySQL:${DB_PORT:-3306}" "Redis:${REDIS_PORT:-6379}" "Kafka:${KAFKA_PORT:-9092}" "Seata:${SEATA_PORT:-18091}"; do
   name="${dep%%:*}"; port="${dep##*:}"
   if port_open "$port"; then
     echo "    [OK]   $name ($port)"
@@ -115,7 +117,7 @@ echo "    JDK: ${JAVA_HOME:-<系统默认>}"
 if [ "$SKIP_BUILD" -eq 0 ]; then
   echo "    执行 mvn clean package -DskipTests,同步当前源码 ..."
   mvn -B -q -DskipTests clean package || { echo "    构建失败,退出"; exit 1; }
-  echo "    [OK]   4 个后端 jar 已重新构建"
+  echo "    [OK]   5 个后端 jar 已重新构建"
 else
   echo "    [SKIP] 已通过 --skip-build 跳过重新构建"
   for i in "${!NAMES[@]}"; do
@@ -137,7 +139,7 @@ for i in "${!NAMES[@]}"; do
   fi
   # 控制台日志用 .console.log:Multi_reward 的 logback 写的是 logs/multi_reward.log,
   # macOS 文件名大小写不敏感,直接写 logs/Multi_reward.log 会把它截断。
-  nohup java -jar "$jar" > "$LOG_DIR/$name.console.log" 2>&1 &
+  nohup java -Dlog.path="$LOG_DIR/$name-$port" -DLOG_HOME="$LOG_DIR/$name-$port" -jar "$jar" --server.port="$port" > "$LOG_DIR/$name.console.log" 2>&1 &
   echo $! > "$pidf"
   echo "    [START] $name (端口 $port, pid $!)"
 done

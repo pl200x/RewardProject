@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.util.Date;
 
 @Service
+@ConditionalOnProperty(name = "reward.reconciliation.enabled", havingValue = "true", matchIfMissing = true)
 public class Scheduling {
     @Autowired
     private CheckScheduleService checkScheduleService;
@@ -39,7 +41,7 @@ public class Scheduling {
 //    System.out.println("doing fourth schedule task");
 //    System.out.println(DateTimeUtil.format(new Date(), Constants.PATTERN));
 //}
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "${reward.reconciliation.cron:0 */1 * * * *}")
     public void scheduledCheck(){
         logger.info("event=SCHEDULE_CHECK_START time={}", DateTimeUtil.format(new Date(), Constants.PATTERN));
         checkScheduleService.checkAmount();

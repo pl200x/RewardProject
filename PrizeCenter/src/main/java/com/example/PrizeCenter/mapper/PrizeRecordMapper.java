@@ -8,6 +8,7 @@ import java.util.List;
 @Mapper
 public interface PrizeRecordMapper {
     PrizeRecord queryByOutBizNo(String outbizno);
+    PrizeRecord queryByOutBizNoForUpdate(String outbizno);
     PrizeRecord queryById(int id);
     void addPrizeRecord(PrizeRecord prizeRecord);
     List<PrizeRecord> queryAll();

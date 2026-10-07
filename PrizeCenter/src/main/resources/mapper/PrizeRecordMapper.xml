@@ -15,6 +15,9 @@
     <select id="queryByOutBizNo" resultMap="PrizeRecordResultMap">
         SELECT * FROM `prize_record` WHERE out_biz_no = #{outbizno};
     </select>
+    <select id="queryByOutBizNoForUpdate" resultMap="PrizeRecordResultMap">
+        SELECT * FROM `prize_record` WHERE out_biz_no = #{outbizno} FOR UPDATE
+    </select>
     <select id="queryById" resultMap="PrizeRecordResultMap">
         SELECT * FROM `prize_record` WHERE id = #{id};
     </select>

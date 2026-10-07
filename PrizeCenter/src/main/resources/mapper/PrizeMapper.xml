@@ -16,6 +16,9 @@
     <select id="queryByCode">
         SELECT * FROM `prize` WHERE code = #{code};
     </select>
+    <select id="queryByCodeForUpdate">
+        SELECT * FROM `prize` WHERE code = #{code} FOR UPDATE
+    </select>
     <select id="queryById">
         SELECT * FROM `prize` WHERE id = #{id};
     </select>
@@ -29,9 +32,10 @@
     <select id="updatePrize">
         UPDATE `prize` SET storage = #{storage}, name = #{name}, description = #{description} WHERE id = #{id}
     </select>
-    <select id="updatePrizeStorage">
-        UPDATE `prize` SET storage = #{storage} WHERE code = #{code}
-    </select>
+    <update id="decrementPrizeStorage">
+        UPDATE `prize` SET storage = storage - #{amount}
+        WHERE code = #{code} AND storage &gt;= #{amount}
+    </update>
 
     <select id="queryAll">
         SELECT * FROM `prize`;

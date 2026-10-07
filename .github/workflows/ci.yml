@@ -20,37 +20,5 @@ jobs:
           cache: maven
       - name: Validate production Compose configuration
         run: docker compose --env-file .env.example config --quiet
-      - name: Start test infrastructure
-        run: docker compose --env-file .env.local.example -f docker-compose.dev.yml up -d mysql redis kafka minio minio-init
-      - name: Wait for MySQL
-        run: |
-          for attempt in {1..60}; do
-            if docker compose --env-file .env.local.example -f docker-compose.dev.yml exec -T mysql \
-              mysqladmin ping -h127.0.0.1 -uroot -preward-local-password --silent; then
-              exit 0
-            fi
-            sleep 2
-          done
-          docker compose --env-file .env.local.example -f docker-compose.dev.yml logs mysql
-          exit 1
-      - name: Wait for Kafka
-        run: |
-          for attempt in {1..60}; do
-            if docker compose --env-file .env.local.example -f docker-compose.dev.yml exec -T kafka \
-              /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --list; then
-              exit 0
-            fi
-            sleep 2
-          done
-          docker compose --env-file .env.local.example -f docker-compose.dev.yml logs kafka
-          exit 1
-      - name: Run backend tests
-        run: |
-          set -a
-          source .env.local.example
-          set +a
-          export OPENAI_API_KEY=test-key
-          mvn -B verify
-      - name: Stop test infrastructure
-        if: always()
-        run: docker compose --env-file .env.local.example -f docker-compose.dev.yml down
+      - name: Verify backend, Seata transactions and real multi-instance services
+        run: ./scripts/verify-discovery.sh --full

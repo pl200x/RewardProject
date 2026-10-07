@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# 停止 RewardProject 的全部前后端(4 个 Spring Boot 服务 + 前端 Vite)。
+# 停止 RewardProject 的全部前后端(注册中心 + 4 个 Spring Boot 服务 + 前端 Vite)。
 #   优先用 run/<name>.pid 里的 PID;若无 PID 文件,则按端口兜底查找并结束。
 #   按端口兜底时必须加 -sTCP:LISTEN,只匹配监听方;否则连到该端口的客户端
 #   (浏览器标签、curl)也会被匹配并杀掉。
@@ -10,8 +10,16 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUN_DIR="$ROOT/run"
 
-NAMES=(ai_chatbot Music_management Multi_reward PrizeCenter)
-PORTS=(8083       8081             8080         8082)
+for env_file in "$ROOT/.env" "$ROOT/.env.local" "$ROOT/ai_chatbot/.env"; do
+  if [ -f "$env_file" ]; then
+    set -a
+    . "$env_file"
+    set +a
+  fi
+done
+
+NAMES=(ai_chatbot Music_management Multi_reward PrizeCenter service-registry)
+PORTS=("${CHATBOT_PORT:-8083}" "${MUSIC_PORT:-8081}" "${REWARD_PORT:-8080}" "${PRIZE_PORT:-8082}" "${REGISTRY_PORT:-8761}")
 
 stop_pid() {  # $1=pid $2=name
   local pid="$1" name="$2"

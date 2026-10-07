@@ -6,6 +6,8 @@ import com.example.PrizeCenter.mapper.PrizeRecordMapper;
 import com.example.PrizeCenter.service.PrizeRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.apache.seata.spring.annotation.GlobalLock;
 
 import java.util.List;
 
@@ -39,6 +41,8 @@ public class PrizeRecordServiceImpl implements PrizeRecordService {
     }
 
     @Override
+    @GlobalLock
+    @Transactional
     public void deletePrizeRecord(int id) {
         prizeRecordMapper.deletePrizeRecord(id);
     }

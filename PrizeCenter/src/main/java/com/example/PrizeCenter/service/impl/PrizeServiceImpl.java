@@ -8,10 +8,12 @@ import com.example.PrizeCenter.entity.PrizeRecord;
 import com.example.PrizeCenter.exception.PrizeDoNotExistedException;
 import com.example.PrizeCenter.exception.PrizeStorageShortageException;
 import com.example.PrizeCenter.mapper.PrizeMapper;
+import com.example.PrizeCenter.mapper.PrizeRecordMapper;
 import com.example.PrizeCenter.service.PrizeRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.seata.spring.annotation.GlobalLock;
 import com.example.PrizeCenter.service.PrizeService;
 
 import java.util.List;
@@ -23,16 +25,16 @@ public class PrizeServiceImpl implements PrizeService {
     @Autowired
     private PrizeRepository prizeRepository;
     @Autowired
+    private PrizeRecordMapper prizeRecordMapper;
+    @Autowired
     private PrizeRecordService prizeRecordService;
     @Override
     public Prize queryByCode(String code) {
-        Prize selectedPrize = prizeRepository.getByCode(code);
-        if(selectedPrize == null){
-            selectedPrize = prizeMapper.queryByCode(code);
-            if(selectedPrize == null) {
-                throw new PrizeDoNotExistedException("prize code" + code + " do not exist");
-            }
-            prizeRepository.addPrizeByCode(selectedPrize);
+        // Redis is outside Seata AT. Reading stock from MySQL avoids a stale cached
+        // after-image surviving a global rollback performed by the resource manager.
+        Prize selectedPrize = prizeMapper.queryByCode(code);
+        if (selectedPrize == null) {
+            throw new PrizeDoNotExistedException("prize code" + code + " do not exist");
         }
         return selectedPrize;
     }
@@ -55,6 +57,7 @@ public class PrizeServiceImpl implements PrizeService {
     }
 
     @Override
+    @GlobalLock
     @Transactional
     public void updatePrize(int id, int storage, String name, String description) {
         Prize prize = queryById(id);
@@ -66,6 +69,7 @@ public class PrizeServiceImpl implements PrizeService {
     }
 
     @Override
+    @GlobalLock
     @Transactional
     public void updatePrizeStorage(String code, int amount,String outbizno) {
         //当amount为0，直接return
@@ -73,22 +77,30 @@ public class PrizeServiceImpl implements PrizeService {
         if(amount == 0){
             return;
         }
-        Prize prize = queryByCode(code);
+        // SELECT FOR UPDATE checks the Seata global lock before treating a replay as committed.
+        // A normal SELECT/duplicate-key response could observe another transaction's phase-one data.
+        Prize prize = prizeMapper.queryByCodeForUpdate(code);
         if(prize == null){
             throw new PrizeDoNotExistedException("this prize is not defined");
         }
-        int totalStorage = prize.getStorage();
-        int newStorage = totalStorage - amount;
-        if(totalStorage < amount ){
-            throw new PrizeStorageShortageException("We don't have enough prize now");
+        PrizeRecord existing = prizeRecordMapper.queryByOutBizNoForUpdate(outbizno);
+        if (existing != null) {
+            if (!code.equals(existing.getCode()) || amount != existing.getAmount()) {
+                throw new IllegalArgumentException("outbizno already belongs to a different award");
+            }
+            return;
         }
-        prizeMapper.updatePrizeStorage(code,newStorage);
-        prizeRepository.deletePrize(prize.getCode(),prize.getId());
+        // The unique out_biz_no protects replays even after the inventory reaches zero.
+        // Both this record and the atomic decrement commit or roll back together.
         PrizeRecordCmd prizeRecordCmd = new PrizeRecordCmd();
         prizeRecordCmd.setCode(code);
         prizeRecordCmd.setAmount(amount);
         prizeRecordCmd.setOutbizno(outbizno);
         prizeRecordService.addPrizeRecord(prizeRecordCmd);
+        if (prizeMapper.decrementPrizeStorage(code, amount) != 1) {
+            throw new PrizeStorageShortageException("We don't have enough prize now");
+        }
+        prizeRepository.deletePrize(prize.getCode(),prize.getId());
     }
 
     @Override
@@ -97,6 +109,7 @@ public class PrizeServiceImpl implements PrizeService {
     }
 
     @Override
+    @GlobalLock
     @Transactional
     public void deletePrize(int id) {
         Prize prize = queryById(id);

@@ -220,7 +220,7 @@ class ToolServiceTest {
         private int configurationCalls;
 
         private StubAIChatIntegration() {
-            super(null, "http://localhost:8080");
+            super(null);
         }
 
         @Override
